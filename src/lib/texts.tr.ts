@@ -16,6 +16,7 @@ export const textsTR = {
     cancel: "İptal",
     questionMark: "?",
     cross: "✗",
+    checkmark: "✅",
     about: "Hakkında",
   },
   meta: {
