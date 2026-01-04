@@ -87,32 +87,18 @@ export default function InvestigationGrid({ caseData }: InvestigationGridProps) 
         const parsed = JSON.parse(saved);
         // Handle migration from old format (backward compatibility)
         if (parsed.SL && !parsed.manual) {
-          // Old format: migrate to new format
-          setGridState({
-            manual: {
-              SL: parsed.SL,
-              SW: parsed.SW || parsed.manual?.SW || [
-                [0, 0, 0],
-                [0, 0, 0],
-                [0, 0, 0],
-              ],
-              LW: parsed.LW || parsed.manual?.LW || [
-                [0, 0, 0],
-                [0, 0, 0],
-                [0, 0, 0],
-              ],
-            },
-            checked: parsed.checked || {
-              SL: null,
-              SW: null,
-              LW: null,
-            },
-          });
-        } else {
+          // Old format detected: clear it and start fresh (new format required)
+          localStorage.removeItem(storageKey);
+          // State will remain at initial empty state
+        } else if (parsed.manual && parsed.checked) {
+          // New format: validate and use
           setGridState(parsed as GridState);
         }
+        // If format is invalid, just use initial state
       } catch (e) {
         console.error("Failed to parse grid state from localStorage", e);
+        // Clear corrupted data
+        localStorage.removeItem(storageKey);
       }
     }
   }, [caseData.id]);
