@@ -52,8 +52,8 @@ function EntityInfoCard({ name, icon, onClose }: EntityInfoCardProps) {
 }
 
 export default function InvestigationGrid({ caseData }: InvestigationGridProps) {
-  const [gridState, setGridState] = useState<GridState>(() => {
-    // Initialize with empty grids and no checked cells
+  // Initial empty state
+  const getInitialState = (): GridState => {
     const emptyGrid: GridCellState[][] = [
       [0, 0, 0],
       [0, 0, 0],
@@ -71,42 +71,55 @@ export default function InvestigationGrid({ caseData }: InvestigationGridProps) 
         LW: null,
       },
     };
-  });
+  };
 
+  const [gridState, setGridState] = useState<GridState>(() => getInitialState());
   const [infoCard, setInfoCard] = useState<{
     name: string;
     icon: string;
   } | null>(null);
 
-  // Load from localStorage on mount
+  // Load from localStorage on mount - AGGRESSIVE CLEANUP
   useEffect(() => {
     const storageKey = `noirnote:grid:${caseData.id}`;
-    const saved = localStorage.getItem(storageKey);
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
-        // Handle migration from old format (backward compatibility)
-        if (parsed.SL && !parsed.manual) {
-          // Old format detected: clear it and start fresh (new format required)
-          localStorage.removeItem(storageKey);
-          // State will remain at initial empty state
-        } else if (parsed.manual && parsed.checked) {
-          // New format: validate and use
-          setGridState(parsed as GridState);
-        }
-        // If format is invalid, just use initial state
-      } catch (e) {
-        console.error("Failed to parse grid state from localStorage", e);
-        // Clear corrupted data
-        localStorage.removeItem(storageKey);
+    
+    // TEMPORARY: Clear all old data to force fresh start
+    localStorage.removeItem(storageKey);
+    
+    // Start with clean state
+    // Uncomment below to re-enable localStorage loading later
+    /*
+    try {
+      const saved = localStorage.getItem(storageKey);
+      if (!saved) {
+        return;
       }
+      const parsed = JSON.parse(saved);
+      if (parsed.manual && parsed.checked) {
+        if (
+          Array.isArray(parsed.manual.SL) &&
+          Array.isArray(parsed.manual.SW) &&
+          Array.isArray(parsed.manual.LW)
+        ) {
+          setGridState(parsed as GridState);
+          return;
+        }
+      }
+      localStorage.removeItem(storageKey);
+    } catch (e) {
+      localStorage.removeItem(storageKey);
     }
+    */
   }, [caseData.id]);
 
   // Save to localStorage whenever gridState changes
   useEffect(() => {
     const storageKey = `noirnote:grid:${caseData.id}`;
-    localStorage.setItem(storageKey, JSON.stringify(gridState));
+    try {
+      localStorage.setItem(storageKey, JSON.stringify(gridState));
+    } catch (e) {
+      console.error("Failed to save grid state", e);
+    }
   }, [gridState, caseData.id]);
 
   // Cycle cell: empty -> X -> ? -> CHECK -> empty
@@ -126,7 +139,7 @@ export default function InvestigationGrid({ caseData }: InvestigationGridProps) 
         if (isCurrentlyChecked) {
           // If checked, remove check (go to empty)
           newState.checked[gridKey] = null;
-          // Manual mark is already 0 (empty) when checked
+          // Manual mark stays at 0 (empty)
         } else {
           // Clear any existing check in this matrix first (only one check per matrix)
           newState.checked[gridKey] = null;
@@ -154,26 +167,32 @@ export default function InvestigationGrid({ caseData }: InvestigationGridProps) 
   );
 
   // Compute derived X marks for a given grid
-  const getDerivedXSet = useCallback(
-    (checked: CheckedCell): Set<string> => {
-      const derivedSet = new Set<string>();
-      if (checked) {
-        // Mark all cells in same row and column as derived X
-        for (let i = 0; i < 3; i++) {
-          // Same row
-          if (i !== checked.col) {
-            derivedSet.add(`${checked.row},${i}`);
-          }
-          // Same column
-          if (i !== checked.row) {
-            derivedSet.add(`${i},${checked.col}`);
-          }
+  const getDerivedXSet = useCallback((checked: CheckedCell): Set<string> => {
+    const derivedSet = new Set<string>();
+    if (checked) {
+      // Mark all cells in same row and column as derived X (except the checked cell itself)
+      for (let i = 0; i < 3; i++) {
+        // Same row
+        if (i !== checked.col) {
+          derivedSet.add(`${checked.row},${i}`);
+        }
+        // Same column
+        if (i !== checked.row) {
+          derivedSet.add(`${i},${checked.col}`);
         }
       }
-      return derivedSet;
-    },
-    []
-  );
+    }
+    return derivedSet;
+  }, []);
+
+  // Compute derived X sets for all grids
+  const derivedXSets = useMemo(() => {
+    return {
+      SL: getDerivedXSet(gridState.checked.SL),
+      SW: getDerivedXSet(gridState.checked.SW),
+      LW: getDerivedXSet(gridState.checked.LW),
+    };
+  }, [gridState.checked, getDerivedXSet]);
 
   const renderGrid = (
     gridKey: keyof GridState["manual"],
@@ -184,7 +203,7 @@ export default function InvestigationGrid({ caseData }: InvestigationGridProps) 
   ) => {
     const manualGrid = gridState.manual[gridKey];
     const checked = gridState.checked[gridKey];
-    const derivedXSet = useMemo(() => getDerivedXSet(checked), [checked]);
+    const derivedXSet = derivedXSets[gridKey];
 
     return (
       <div className="space-y-3">
@@ -199,7 +218,7 @@ export default function InvestigationGrid({ caseData }: InvestigationGridProps) 
               <thead>
                 <tr>
                   <th className="w-12 h-12"></th>
-                  {colHeaders.map((header, idx) => (
+                  {colHeaders.map((header) => (
                     <th
                       key={header.id}
                       className="w-16 h-16 p-1 border border-zinc-800"
@@ -245,33 +264,27 @@ export default function InvestigationGrid({ caseData }: InvestigationGridProps) 
                       const isDerivedX = derivedXSet.has(cellKey);
 
                       // Determine what to display (priority: CHECK > manual mark > derived X > empty)
-                      let displayState: "empty" | "question" | "x" | "check" | "derivedX";
                       let bgClass: string;
                       let textClass: string;
                       let displayText: string;
 
                       if (isChecked) {
-                        displayState = "check";
                         bgClass = "bg-green-900/40 hover:bg-green-900/50";
                         textClass = "text-green-400";
                         displayText = textsTR.common.checkmark;
-                      } else if (manualMark === 1) {
-                        displayState = "question";
-                        bgClass = "bg-yellow-900/30 hover:bg-yellow-900/40";
-                        textClass = "text-yellow-400";
-                        displayText = textsTR.common.questionMark;
                       } else if (manualMark === 2) {
-                        displayState = "x";
                         bgClass = "bg-red-900/30 hover:bg-red-900/40";
                         textClass = "text-red-400";
                         displayText = textsTR.common.cross;
+                      } else if (manualMark === 1) {
+                        bgClass = "bg-yellow-900/30 hover:bg-yellow-900/40";
+                        textClass = "text-yellow-400";
+                        displayText = textsTR.common.questionMark;
                       } else if (isDerivedX) {
-                        displayState = "derivedX";
                         bgClass = "bg-red-900/20 hover:bg-red-900/30";
                         textClass = "text-red-500/70";
                         displayText = textsTR.common.cross;
                       } else {
-                        displayState = "empty";
                         bgClass = "bg-zinc-900 hover:bg-zinc-800";
                         textClass = "text-zinc-600";
                         displayText = "";
