@@ -46,6 +46,45 @@ export const textsTR = {
     placeholder:
       "Burası oyun akışı için başlangıç noktası olacak. (İskelet sayfa)",
   },
+  cases: {
+    list: {
+      title: "Vakalar",
+      startButton: "Vakayı Başlat",
+    },
+    clues: "İpuçları",
+    boardPlaceholder: "Oyun tahtası burada olacak",
+    case001: {
+      title: "Müze Soygunu",
+      clues: {
+        clue1: "Katil, suç mahallinde bir parmak izi bırakmış.",
+        clue2: "Olay yerinde bulunan eşya, şüphelilerden birinin evinde de var.",
+        clue3: "Şahit ifadesine göre, katil olay yerinden koşarak kaçmış.",
+        clue4: "Suç aleti, suç mahallinden 100 metre uzakta bulunmuş.",
+        clue5: "Katil, olay sırasında sağlak bir kişi olmalı.",
+      },
+    },
+  },
+  suspects: {
+    suspect001: "Ahmet Yılmaz",
+    suspect002: "Zeynep Kaya",
+    suspect003: "Mehmet Demir",
+  },
+  locations: {
+    location001: "Müze Girişi",
+    location002: "Sergi Salonu",
+    location003: "Depo",
+  },
+  items: {
+    item001: "Bıçak",
+    item002: "Çekiç",
+    item003: "Silah",
+  },
+  difficulty: {
+    label: "Zorluk:",
+    easy: "Kolay",
+    medium: "Orta",
+    hard: "Zor",
+  },
   profile: {
     title: "Profil",
     placeholder:
