@@ -11,10 +11,9 @@ export type FirestoreUserDoc = {
 };
 
 export async function ensureUserDoc(user: User): Promise<void> {
-  const fb = getFirebaseClient();
-  if (!fb) return;
+  const { db } = getFirebaseClient();
 
-  const ref = doc(fb.db, "users", user.uid);
+  const ref = doc(db, "users", user.uid);
   const snap = await getDoc(ref);
   if (snap.exists()) return;
 
