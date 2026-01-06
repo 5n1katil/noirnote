@@ -2,12 +2,12 @@
  * NoirNote — Grid state types
  *
  * Grid state yapısı:
- * - Manual marks: 0 = EMPTY, 1 = QUESTION, 2 = X
- * - Checked cell: stored separately per matrix
+ * - Cell state: "empty" | "x" | "q" | "check"
+ * - 4-state cycle: empty -> x -> q -> check -> empty
  * - Derived X marks: computed at render time from checked cell
  */
 
-export type GridCellState = 0 | 1 | 2; // 0=empty, 1=?, 2=X (manual marks only)
+export type GridCellState = "empty" | "x" | "q" | "check";
 
 export type CheckedCell = {
   row: number;
@@ -15,17 +15,9 @@ export type CheckedCell = {
 } | null;
 
 export type GridState = {
-  // Manual marks only (user-set X and ?)
-  manual: {
-    SL: GridCellState[][]; // Suspect x Location (3x3)
-    SW: GridCellState[][]; // Suspect x Weapon (3x3)
-    LW: GridCellState[][]; // Location x Weapon (3x3)
-  };
-  // Checked cell per matrix (only one per matrix)
-  checked: {
-    SL: CheckedCell;
-    SW: CheckedCell;
-    LW: CheckedCell;
-  };
+  // Cell states per matrix
+  SL: GridCellState[][]; // Suspect x Location (3x3)
+  SW: GridCellState[][]; // Suspect x Weapon (3x3)
+  LW: GridCellState[][]; // Location x Weapon (3x3)
 };
 

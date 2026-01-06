@@ -1,6 +1,7 @@
 ﻿"use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { ReactNode, useEffect, useMemo, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { onAuthStateChanged, signOut, User } from "firebase/auth";
@@ -70,29 +71,42 @@ export function AuthedShell({ title, children }: AuthedShellProps) {
             style={{
               display: "flex",
               alignItems: "center",
-              gap: 10,
+              gap: 14,
               textDecoration: "none",
               color: "white",
-              minWidth: 180,
+              minWidth: 200,
             }}
           >
             <div
               style={{
-                width: 34,
-                height: 34,
-                borderRadius: 10,
-                background: "white",
-                color: "black",
-                display: "grid",
-                placeItems: "center",
-                fontWeight: 900,
+                width: 56,
+                height: 56,
+                borderRadius: 12,
+                overflow: "hidden",
+                flexShrink: 0,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                background: "rgba(255,255,255,0.05)",
+                border: "1px solid rgba(255,255,255,0.1)",
               }}
             >
-              N
+              <Image
+                src="/logo.png"
+                alt={textsTR.a11y.appLogoAlt}
+                width={56}
+                height={56}
+                priority
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "contain",
+                }}
+              />
             </div>
-            <div style={{ lineHeight: 1.1 }}>
-              <div style={{ fontWeight: 800 }}>NoirNote</div>
-              <div style={{ fontSize: 12, opacity: 0.75 }}>5N 1Dedektif</div>
+            <div style={{ lineHeight: 1.2 }}>
+              <div style={{ fontWeight: 900, fontSize: 18 }}>NoirNote</div>
+              <div style={{ fontSize: 11, opacity: 0.7, letterSpacing: "0.5px" }}>5N 1Dedektif</div>
             </div>
           </Link>
 

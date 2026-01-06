@@ -3,17 +3,16 @@
 /**
  * NoirNote — Investigation Grid Component
  *
- * 3 küçük grid (Suspect x Location, Suspect x Weapon, Location x Weapon)
- * Her hücre tıklanabilir ve durum döngüsü: EMPTY -> X -> ? -> CHECK -> EMPTY
- * CHECK durumunda, aynı satır ve sütundaki diğer hücreler otomatik olarak X olur (türetilmiş işaretler).
- * Durum localStorage'a kaydedilir.
+ * Wrapper component that manages grid state and renders LNotebookGrid.
+ * Handles localStorage persistence and entity info cards.
  */
 
-import { useEffect, useState, useCallback, useMemo } from "react";
+import { useEffect, useState, useCallback } from "react";
 import type { Case } from "@/types/game";
-import type { GridState, GridCellState, CheckedCell } from "@/types/grid";
+import type { GridState, GridCellState } from "@/types/grid";
 import { textsTR } from "@/lib/texts.tr";
 import { getText } from "@/lib/text-resolver";
+import LNotebookGrid from "./LNotebookGrid";
 
 type InvestigationGridProps = {
   caseData: Case;
@@ -51,25 +50,34 @@ function EntityInfoCard({ name, icon, onClose }: EntityInfoCardProps) {
   );
 }
 
+// Next cycle function: empty -> x -> check -> q -> empty
+function nextCycle(current: GridCellState): GridCellState {
+  switch (current) {
+    case "empty":
+      return "x";
+    case "x":
+      return "check";
+    case "check":
+      return "q";
+    case "q":
+      return "empty";
+    default:
+      return "empty";
+  }
+}
+
 export default function InvestigationGrid({ caseData }: InvestigationGridProps) {
   // Initial empty state
   const getInitialState = (): GridState => {
     const emptyGrid: GridCellState[][] = [
-      [0, 0, 0],
-      [0, 0, 0],
-      [0, 0, 0],
+      ["empty", "empty", "empty"],
+      ["empty", "empty", "empty"],
+      ["empty", "empty", "empty"],
     ];
     return {
-      manual: {
-        SL: emptyGrid,
-        SW: emptyGrid,
-        LW: emptyGrid,
-      },
-      checked: {
-        SL: null,
-        SW: null,
-        LW: null,
-      },
+      SL: emptyGrid,
+      SW: emptyGrid,
+      LW: emptyGrid,
     };
   };
 
@@ -79,37 +87,31 @@ export default function InvestigationGrid({ caseData }: InvestigationGridProps) 
     icon: string;
   } | null>(null);
 
-  // Load from localStorage on mount - AGGRESSIVE CLEANUP
+  // Load from localStorage on mount
   useEffect(() => {
     const storageKey = `noirnote:grid:${caseData.id}`;
-    
-    // TEMPORARY: Clear all old data to force fresh start
-    localStorage.removeItem(storageKey);
-    
-    // Start with clean state
-    // Uncomment below to re-enable localStorage loading later
-    /*
     try {
       const saved = localStorage.getItem(storageKey);
-      if (!saved) {
-        return;
-      }
-      const parsed = JSON.parse(saved);
-      if (parsed.manual && parsed.checked) {
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        // Validate structure
         if (
-          Array.isArray(parsed.manual.SL) &&
-          Array.isArray(parsed.manual.SW) &&
-          Array.isArray(parsed.manual.LW)
+          parsed.SL &&
+          parsed.SW &&
+          parsed.LW &&
+          Array.isArray(parsed.SL) &&
+          Array.isArray(parsed.SW) &&
+          Array.isArray(parsed.LW)
         ) {
           setGridState(parsed as GridState);
-          return;
+        } else {
+          localStorage.removeItem(storageKey);
         }
       }
-      localStorage.removeItem(storageKey);
     } catch (e) {
+      console.error("Failed to load grid state", e);
       localStorage.removeItem(storageKey);
     }
-    */
   }, [caseData.id]);
 
   // Save to localStorage whenever gridState changes
@@ -122,197 +124,58 @@ export default function InvestigationGrid({ caseData }: InvestigationGridProps) 
     }
   }, [gridState, caseData.id]);
 
-  // Cycle cell: empty -> X -> ? -> CHECK -> empty
-  const cycleCell = useCallback(
-    (gridKey: keyof GridState["manual"], row: number, col: number) => {
+  // Handle cell click
+  const handleCellClick = useCallback(
+    (section: "SW" | "SL" | "LW", row: number, col: number) => {
       setGridState((prev) => {
-        const newState = { ...prev };
-        const manualGrid = [...newState.manual[gridKey]];
-        const rowCopy = [...manualGrid[row]];
-        const currentManualMark = rowCopy[col];
-        const currentChecked = newState.checked[gridKey];
+        const grid = [...prev[section]];
+        const rowCopy = [...grid[row]];
+        const currentState = rowCopy[col] as GridCellState;
 
-        // Check if this cell is currently checked
-        const isCurrentlyChecked =
-          currentChecked?.row === row && currentChecked?.col === col;
+        // Simply cycle to next state - each cell is independent
+        const nextState = nextCycle(currentState);
+        rowCopy[col] = nextState;
 
-        if (isCurrentlyChecked) {
-          // If checked, remove check (go to empty)
-          newState.checked[gridKey] = null;
-          // Manual mark stays at 0 (empty)
-        } else {
-          // Clear any existing check in this matrix first (only one check per matrix)
-          newState.checked[gridKey] = null;
+        grid[row] = rowCopy;
+        const newState = { ...prev, [section]: grid };
 
-          // Cycle manual mark: empty (0) -> X (2) -> ? (1) -> CHECK
-          if (currentManualMark === 0) {
-            // empty -> X
-            rowCopy[col] = 2;
-          } else if (currentManualMark === 2) {
-            // X -> ?
-            rowCopy[col] = 1;
-          } else if (currentManualMark === 1) {
-            // ? -> CHECK (clear manual mark, set checked)
-            rowCopy[col] = 0;
-            newState.checked[gridKey] = { row, col };
-          }
-        }
+        // Debug logging
+        const finalState = newState[section][row][col];
+        console.log("[CELL CLICK]", {
+          section,
+          row,
+          col,
+          prev: currentState,
+          next: finalState,
+        });
 
-        manualGrid[row] = rowCopy;
-        newState.manual[gridKey] = manualGrid;
         return newState;
       });
     },
     []
   );
 
-  // Compute derived X marks for a given grid
-  const getDerivedXSet = useCallback((checked: CheckedCell): Set<string> => {
-    const derivedSet = new Set<string>();
-    if (checked) {
-      // Mark all cells in same row and column as derived X (except the checked cell itself)
-      for (let i = 0; i < 3; i++) {
-        // Same row
-        if (i !== checked.col) {
-          derivedSet.add(`${checked.row},${i}`);
-        }
-        // Same column
-        if (i !== checked.row) {
-          derivedSet.add(`${i},${checked.col}`);
-        }
+  // Handle header click (show info card)
+  const handleHeaderClick = useCallback(
+    (type: "suspect" | "weapon" | "location", id: string) => {
+      let entity;
+      if (type === "suspect") {
+        entity = caseData.suspects.find((s) => s.id === id);
+      } else if (type === "weapon") {
+        entity = caseData.weapons.find((w) => w.id === id);
+      } else {
+        entity = caseData.locations.find((l) => l.id === id);
       }
-    }
-    return derivedSet;
-  }, []);
 
-  // Compute derived X sets for all grids
-  const derivedXSets = useMemo(() => {
-    return {
-      SL: getDerivedXSet(gridState.checked.SL),
-      SW: getDerivedXSet(gridState.checked.SW),
-      LW: getDerivedXSet(gridState.checked.LW),
-    };
-  }, [gridState.checked, getDerivedXSet]);
-
-  const renderGrid = (
-    gridKey: keyof GridState["manual"],
-    rowHeaders: Array<{ id: string; nameKey: string; iconKey: string }>,
-    colHeaders: Array<{ id: string; nameKey: string; iconKey: string }>,
-    rowLabel: string,
-    colLabel: string
-  ) => {
-    const manualGrid = gridState.manual[gridKey];
-    const checked = gridState.checked[gridKey];
-    const derivedXSet = derivedXSets[gridKey];
-
-    return (
-      <div className="space-y-3">
-        <div className="flex items-center gap-3">
-          <h3 className="text-sm font-semibold text-zinc-400">{rowLabel}</h3>
-          <span className="text-zinc-600">×</span>
-          <h3 className="text-sm font-semibold text-zinc-400">{colLabel}</h3>
-        </div>
-        <div className="overflow-x-auto">
-          <div className="inline-block min-w-full">
-            <table className="w-full border-collapse">
-              <thead>
-                <tr>
-                  <th className="w-12 h-12"></th>
-                  {colHeaders.map((header) => (
-                    <th
-                      key={header.id}
-                      className="w-16 h-16 p-1 border border-zinc-800"
-                    >
-                      <button
-                        onClick={() => {
-                          setInfoCard({
-                            name: getText(header.nameKey),
-                            icon: getText(header.iconKey),
-                          });
-                        }}
-                        className="w-full h-full flex flex-col items-center justify-center gap-1 hover:bg-zinc-800 transition-colors rounded"
-                        title={getText(header.nameKey)}
-                      >
-                        <span className="text-xl">{getText(header.iconKey)}</span>
-                      </button>
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {rowHeaders.map((rowHeader, rowIdx) => (
-                  <tr key={rowHeader.id}>
-                    <td className="w-16 h-16 p-1 border border-zinc-800">
-                      <button
-                        onClick={() => {
-                          setInfoCard({
-                            name: getText(rowHeader.nameKey),
-                            icon: getText(rowHeader.iconKey),
-                          });
-                        }}
-                        className="w-full h-full flex flex-col items-center justify-center gap-1 hover:bg-zinc-800 transition-colors rounded"
-                        title={getText(rowHeader.nameKey)}
-                      >
-                        <span className="text-xl">{getText(rowHeader.iconKey)}</span>
-                      </button>
-                    </td>
-                    {colHeaders.map((_, colIdx) => {
-                      const cellKey = `${rowIdx},${colIdx}`;
-                      const isChecked =
-                        checked?.row === rowIdx && checked?.col === colIdx;
-                      const manualMark = manualGrid[rowIdx][colIdx];
-                      const isDerivedX = derivedXSet.has(cellKey);
-
-                      // Determine what to display (priority: CHECK > manual mark > derived X > empty)
-                      let bgClass: string;
-                      let textClass: string;
-                      let displayText: string;
-
-                      if (isChecked) {
-                        bgClass = "bg-green-900/40 hover:bg-green-900/50";
-                        textClass = "text-green-400";
-                        displayText = textsTR.common.checkmark;
-                      } else if (manualMark === 2) {
-                        bgClass = "bg-red-900/30 hover:bg-red-900/40";
-                        textClass = "text-red-400";
-                        displayText = textsTR.common.cross;
-                      } else if (manualMark === 1) {
-                        bgClass = "bg-yellow-900/30 hover:bg-yellow-900/40";
-                        textClass = "text-yellow-400";
-                        displayText = textsTR.common.questionMark;
-                      } else if (isDerivedX) {
-                        bgClass = "bg-red-900/20 hover:bg-red-900/30";
-                        textClass = "text-red-500/70";
-                        displayText = textsTR.common.cross;
-                      } else {
-                        bgClass = "bg-zinc-900 hover:bg-zinc-800";
-                        textClass = "text-zinc-600";
-                        displayText = "";
-                      }
-
-                      return (
-                        <td
-                          key={colIdx}
-                          className="w-16 h-16 p-1 border border-zinc-800"
-                        >
-                          <button
-                            onClick={() => cycleCell(gridKey, rowIdx, colIdx)}
-                            className={`w-full h-full flex items-center justify-center rounded transition-colors ${bgClass} ${textClass}`}
-                          >
-                            {displayText}
-                          </button>
-                        </td>
-                      );
-                    })}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-    );
-  };
+      if (entity) {
+        setInfoCard({
+          name: getText(entity.nameKey),
+          icon: getText(entity.iconKey),
+        });
+      }
+    },
+    [caseData]
+  );
 
   return (
     <>
@@ -321,32 +184,17 @@ export default function InvestigationGrid({ caseData }: InvestigationGridProps) 
           {textsTR.grid.title}
         </h2>
 
-        {/* Suspect x Location Grid */}
-        {renderGrid(
-          "SL",
-          caseData.suspects,
-          caseData.locations,
-          textsTR.grid.suspects,
-          textsTR.grid.locations
-        )}
-
-        {/* Suspect x Weapon Grid */}
-        {renderGrid(
-          "SW",
-          caseData.suspects,
-          caseData.weapons,
-          textsTR.grid.suspects,
-          textsTR.grid.weapons
-        )}
-
-        {/* Location x Weapon Grid */}
-        {renderGrid(
-          "LW",
-          caseData.locations,
-          caseData.weapons,
-          textsTR.grid.locations,
-          textsTR.grid.weapons
-        )}
+        {/* L-shaped notebook grid */}
+        <div className="overflow-x-auto">
+          <LNotebookGrid
+            suspects={caseData.suspects}
+            weapons={caseData.weapons}
+            locations={caseData.locations}
+            gridState={gridState}
+            onCellClick={handleCellClick}
+            onHeaderClick={handleHeaderClick}
+          />
+        </div>
       </div>
 
       {/* Info Card Modal */}

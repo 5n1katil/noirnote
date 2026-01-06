@@ -6,40 +6,60 @@ import { cases } from "@/lib/cases";
 import { getText } from "@/lib/text-resolver";
 
 export default function DashboardPage() {
+  const getDifficultyColor = (difficulty: "easy" | "medium" | "hard") => {
+    switch (difficulty) {
+      case "easy":
+        return "bg-green-500/20 text-green-400 border-green-500/30";
+      case "medium":
+        return "bg-yellow-500/20 text-yellow-400 border-yellow-500/30";
+      case "hard":
+        return "bg-red-500/20 text-red-400 border-red-500/30";
+      default:
+        return "bg-zinc-500/20 text-zinc-400 border-zinc-500/30";
+    }
+  };
+
   return (
     <AuthGate>
       <AuthedShell title={textsTR.dashboard.title}>
         <div className="space-y-6">
           <div>
-            <h2 className="text-xl font-semibold text-white mb-4">
+            <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-3">
+              <span className="text-3xl">📋</span>
               {textsTR.cases.list.title}
             </h2>
-            <div className="grid gap-4">
+            <div className="grid gap-5 md:grid-cols-2">
               {cases.map((caseItem) => (
                 <div
                   key={caseItem.id}
-                  className="rounded-xl border border-zinc-800 bg-zinc-900 p-5"
+                  className="group rounded-xl border border-zinc-800 bg-gradient-to-br from-zinc-900 to-zinc-950 p-6 hover:border-zinc-700 hover:shadow-xl hover:shadow-black/20 transition-all duration-300"
                 >
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="flex-1">
-                      <h3 className="text-lg font-semibold text-white mb-2">
-                        {getText(caseItem.titleKey)}
-                      </h3>
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs font-medium text-zinc-400">
-                          {textsTR.difficulty.label}
-                        </span>
-                        <span className="text-sm font-medium text-zinc-300">
-                          {textsTR.difficulty[caseItem.difficulty]}
-                        </span>
+                  <div className="flex flex-col gap-4">
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="flex-1">
+                        <h3 className="text-xl font-bold text-white mb-3 group-hover:text-white transition-colors">
+                          {getText(caseItem.titleKey)}
+                        </h3>
+                        <div className="flex items-center gap-3">
+                          <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold border ${getDifficultyColor(caseItem.difficulty)}`}>
+                            <span className="w-1.5 h-1.5 rounded-full bg-current"></span>
+                            {textsTR.difficulty[caseItem.difficulty]}
+                          </span>
+                        </div>
                       </div>
                     </div>
-                    <Link
-                      href={`/case/${caseItem.id}`}
-                      className="inline-flex items-center justify-center rounded-lg bg-white px-4 py-2 text-sm font-medium text-black hover:bg-zinc-200 transition-colors"
-                    >
-                      {textsTR.cases.list.startButton}
-                    </Link>
+                    <div className="flex items-center justify-between pt-2 border-t border-zinc-800">
+                      <div className="text-xs text-zinc-500">
+                        {caseItem.suspects.length} şüpheli • {caseItem.locations.length} konum • {caseItem.weapons.length} silah
+                      </div>
+                      <Link
+                        href={`/case/${caseItem.id}`}
+                        className="inline-flex items-center justify-center rounded-lg bg-white text-black px-5 py-2.5 text-sm font-semibold hover:bg-zinc-200 active:scale-95 transition-all duration-200 shadow-lg shadow-black/20"
+                      >
+                        {textsTR.cases.list.startButton}
+                        <span className="ml-2">→</span>
+                      </Link>
+                    </div>
                   </div>
                 </div>
               ))}
