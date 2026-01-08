@@ -45,117 +45,115 @@ export default function CaseClient({ caseData }: CaseClientProps) {
   const [finalSuspect, setFinalSuspect] = useState<string>("");
   const [finalLocation, setFinalLocation] = useState<string>("");
   const [finalWeapon, setFinalWeapon] = useState<string>("");
-  const [activeCase, setActiveCase] = useState<ActiveCase | null>(null);
+  
+  // Optimistic UI: Start with local state immediately, sync with Firestore in background
+  const initialLocalCase: ActiveCase = {
+    caseId: caseData.id,
+    status: "playing",
+    startedAt: Date.now(),
+    attempts: 0,
+    penaltyMs: 0,
+    gridState: getInitialGridState(),
+    updatedAt: null,
+  };
+
+  const [activeCase, setActiveCase] = useState<ActiveCase>(initialLocalCase);
   const [gridState, setGridState] = useState<GridState>(getInitialGridState());
   const [resultState, setResultState] = useState<ResultState>(null);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   const allSelected = finalSuspect && finalLocation && finalWeapon;
   const isModalOpen = resultState !== null;
 
-  // Load active case from Firestore
+  // Load active case from Firestore in background (non-blocking)
   useEffect(() => {
     let mounted = true;
 
-    async function loadActiveCase() {
+    async function syncWithFirestore() {
       try {
         const loaded = await getActiveCase(caseData.id);
         
         if (!mounted) return;
 
         if (loaded && loaded.status === "playing") {
+          // Sync with Firestore data if available
           setActiveCase(loaded);
           setGridState(loaded.gridState);
-          setIsLoading(false);
-        } else {
-          // Initialize new active case
-          const initialized = await initializeActiveCase(caseData.id, getInitialGridState());
-          if (mounted) {
-            setActiveCase(initialized);
-            setIsLoading(false);
-          }
+        } else if (!loaded) {
+          // No existing case, initialize in Firestore (background)
+          const initialState = getInitialGridState();
+          initializeActiveCase(caseData.id, initialState).catch((error) => {
+            console.error("[CaseClient] Failed to initialize in Firestore:", error);
+          });
         }
       } catch (error) {
-        console.error("[CaseClient] Failed to load active case:", error);
-        // Initialize on error (fallback)
-        try {
-          const initialized = await initializeActiveCase(caseData.id, getInitialGridState());
-          if (mounted) {
-            setActiveCase(initialized);
-            setIsLoading(false);
-          }
-        } catch (initError) {
-          console.error("[CaseClient] Failed to initialize active case:", initError);
-          // Even if initialization fails, show UI with default state
-          if (mounted) {
-            const fallbackCase: ActiveCase = {
-              caseId: caseData.id,
-              status: "playing",
-              startedAt: Date.now(),
-              attempts: 0,
-              penaltyMs: 0,
-              gridState: getInitialGridState(),
-              updatedAt: null,
-            };
-            setActiveCase(fallbackCase);
-            setIsLoading(false);
-          }
-        }
+        console.error("[CaseClient] Failed to sync with Firestore:", error);
+        // Continue with local state, try to initialize later
+        const initialState = getInitialGridState();
+        initializeActiveCase(caseData.id, initialState).catch((error) => {
+          console.error("[CaseClient] Failed to initialize active case:", error);
+        });
       }
     }
 
-    loadActiveCase();
+    // Load in background without blocking UI
+    syncWithFirestore();
 
     return () => {
       mounted = false;
     };
-  }, [caseData.id]);
+  }, [caseData.id]); // Only on mount
 
-  // Debounced save grid state to Firestore
+  // Update activeCase.gridState optimistically when gridState changes
   useEffect(() => {
-    if (!activeCase || isLoading) return;
+    setActiveCase((prev) => ({ ...prev, gridState }));
+  }, [gridState]);
 
+  // Debounced save grid state to Firestore (faster debounce)
+  useEffect(() => {
     const timeoutId = setTimeout(async () => {
       try {
+        // Get latest activeCase state using ref pattern
         await saveActiveCase({
-          ...activeCase,
-          gridState,
+          caseId: activeCase.caseId,
+          status: activeCase.status,
+          startedAt: activeCase.startedAt,
+          attempts: activeCase.attempts,
+          penaltyMs: activeCase.penaltyMs,
+          gridState, // Use latest gridState from closure
         });
       } catch (error) {
         console.error("[CaseClient] Failed to save grid state:", error);
       }
-    }, 1000); // 1 second debounce
+    }, 500); // 500ms debounce (faster)
 
     return () => clearTimeout(timeoutId);
-  }, [gridState, activeCase, isLoading]);
+  }, [gridState, activeCase]); // Depend on gridState and activeCase
 
   // Timer calculation (duration + penalty) - update every second
   const [currentDuration, setCurrentDuration] = useState(0);
 
   useEffect(() => {
-    if (!activeCase || isLoading) {
-      setCurrentDuration(0);
-      return;
-    }
-
     const interval = setInterval(() => {
-      setCurrentDuration(Math.floor((Date.now() - activeCase.startedAt + activeCase.penaltyMs) / 1000));
+      setCurrentDuration((prev) => {
+        const newDuration = Math.floor((Date.now() - activeCase.startedAt + activeCase.penaltyMs) / 1000);
+        return newDuration;
+      });
     }, 1000);
 
     // Set initial value immediately
     setCurrentDuration(Math.floor((Date.now() - activeCase.startedAt + activeCase.penaltyMs) / 1000));
 
     return () => clearInterval(interval);
-  }, [activeCase, isLoading]);
+  }, [activeCase.startedAt, activeCase.penaltyMs]);
 
   // Handle grid state changes from InvestigationGrid
   const handleGridStateChange = useCallback((newState: GridState) => {
     setGridState(newState);
   }, []);
 
-  // Submit handler
-  async function onSubmitReport() {
+  // Submit handler - non-blocking, show modal immediately
+  function onSubmitReport() {
     if (!allSelected || isSubmitting || isModalOpen || !activeCase) return;
 
     setIsSubmitting(true);
@@ -169,36 +167,44 @@ export default function CaseClient({ caseData }: CaseClientProps) {
     const newAttempts = activeCase.attempts + 1;
     let newPenaltyMs = activeCase.penaltyMs;
     let newStatus: "playing" | "finished" = activeCase.status;
+    const durationMs = Date.now() - activeCase.startedAt + activeCase.penaltyMs;
 
     if (isCorrect) {
       // Correct solution
       newStatus = "finished";
-      const durationMs = Date.now() - activeCase.startedAt + activeCase.penaltyMs;
-
-      // Save result
-      saveCaseResult(caseData.id, durationMs, activeCase.penaltyMs, newAttempts, true).catch((error) => {
-        console.error("[CaseClient] Failed to save result:", error);
-      });
-
-      // Update active case
-      await saveActiveCase({
+      const updated = {
         ...activeCase,
         status: newStatus,
         attempts: newAttempts,
         gridState,
-      });
+      };
 
+      // Update local state immediately (optimistic)
+      setActiveCase(updated);
+
+      // Show modal immediately (non-blocking)
       setResultState({
         type: "success",
         duration: Math.floor(durationMs / 1000),
         attempts: newAttempts,
         penaltyMs: activeCase.penaltyMs,
       });
+
+      // Reset submitting state immediately (modal is open, so button will be disabled anyway)
+      setIsSubmitting(false);
+
+      // Save to Firestore in background (non-blocking)
+      saveActiveCase(updated).catch((error) => {
+        console.error("[CaseClient] Failed to save active case:", error);
+      });
+      saveCaseResult(caseData.id, durationMs, activeCase.penaltyMs, newAttempts, true).catch((error) => {
+        console.error("[CaseClient] Failed to save result:", error);
+      });
     } else {
       // Wrong solution - apply penalty
       newPenaltyMs = activeCase.penaltyMs + PENALTY_MS;
+      const wrongDurationMs = Date.now() - activeCase.startedAt + newPenaltyMs;
 
-      // Update active case with penalty
       const updated = {
         ...activeCase,
         attempts: newAttempts,
@@ -206,24 +212,28 @@ export default function CaseClient({ caseData }: CaseClientProps) {
         gridState,
       };
 
-      await saveActiveCase(updated);
+      // Update local state immediately (optimistic)
       setActiveCase(updated);
 
-      // Save result (wrong attempt)
-      const durationMs = Date.now() - activeCase.startedAt + newPenaltyMs;
-      saveCaseResult(caseData.id, durationMs, newPenaltyMs, newAttempts, false).catch((error) => {
-        console.error("[CaseClient] Failed to save result:", error);
-      });
-
+      // Show modal immediately (non-blocking)
       setResultState({
         type: "failure",
-        duration: Math.floor(durationMs / 1000),
+        duration: Math.floor(wrongDurationMs / 1000),
         attempts: newAttempts,
         penaltyMs: newPenaltyMs,
       });
-    }
 
-    setIsSubmitting(false);
+      // Reset submitting state immediately (modal is open, so button will be disabled anyway)
+      setIsSubmitting(false);
+
+      // Save to Firestore in background (non-blocking)
+      saveActiveCase(updated).catch((error) => {
+        console.error("[CaseClient] Failed to save active case:", error);
+      });
+      saveCaseResult(caseData.id, wrongDurationMs, newPenaltyMs, newAttempts, false).catch((error) => {
+        console.error("[CaseClient] Failed to save result:", error);
+      });
+    }
   }
 
   function closeResultModal() {
@@ -241,14 +251,7 @@ export default function CaseClient({ caseData }: CaseClientProps) {
     return `${secs}sn`;
   }
 
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center py-12">
-        <div className="text-zinc-400">{textsTR.common.loading}</div>
-      </div>
-    );
-  }
-
+  // UI is always shown immediately (optimistic rendering)
   return (
     <>
       <div className={`space-y-8 ${isModalOpen ? "pointer-events-none opacity-50" : ""}`}>
@@ -261,9 +264,9 @@ export default function CaseClient({ caseData }: CaseClientProps) {
             </div>
             <div className="rounded-lg border border-zinc-800 bg-zinc-950/50 px-4 py-2">
               <span className="text-xs text-zinc-400 mr-2">🎯 Denemeler:</span>
-              <span className="text-sm font-semibold text-white">{activeCase?.attempts || 0}</span>
+              <span className="text-sm font-semibold text-white">{activeCase.attempts}</span>
             </div>
-            {activeCase && activeCase.penaltyMs > 0 && (
+            {activeCase.penaltyMs > 0 && (
               <div className="rounded-lg border border-red-800/50 bg-red-950/20 px-4 py-2">
                 <span className="text-xs text-red-400 mr-2">⚠️ Ceza:</span>
                 <span className="text-sm font-semibold text-red-400">
@@ -342,7 +345,7 @@ export default function CaseClient({ caseData }: CaseClientProps) {
             <select
               value={finalSuspect}
               onChange={(e) => setFinalSuspect(e.target.value)}
-              disabled={isModalOpen || isSubmitting || activeCase?.status === "finished"}
+              disabled={isModalOpen || isSubmitting || activeCase.status === "finished"}
               className="w-full rounded-lg border border-zinc-800 bg-zinc-950 px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-white/30 focus:border-zinc-700 transition-all font-medium disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <option value="">-- Seçiniz --</option>
@@ -363,7 +366,7 @@ export default function CaseClient({ caseData }: CaseClientProps) {
             <select
               value={finalLocation}
               onChange={(e) => setFinalLocation(e.target.value)}
-              disabled={isModalOpen || isSubmitting || activeCase?.status === "finished"}
+              disabled={isModalOpen || isSubmitting || activeCase.status === "finished"}
               className="w-full rounded-lg border border-zinc-800 bg-zinc-950 px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-white/30 focus:border-zinc-700 transition-all font-medium disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <option value="">-- Seçiniz --</option>
@@ -384,7 +387,7 @@ export default function CaseClient({ caseData }: CaseClientProps) {
             <select
               value={finalWeapon}
               onChange={(e) => setFinalWeapon(e.target.value)}
-              disabled={isModalOpen || isSubmitting || activeCase?.status === "finished"}
+              disabled={isModalOpen || isSubmitting || activeCase.status === "finished"}
               className="w-full rounded-lg border border-zinc-800 bg-zinc-950 px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-white/30 focus:border-zinc-700 transition-all font-medium disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <option value="">-- Seçiniz --</option>
@@ -400,15 +403,15 @@ export default function CaseClient({ caseData }: CaseClientProps) {
         {/* Submit Button */}
         <button
           onClick={onSubmitReport}
-          disabled={!allSelected || isSubmitting || isModalOpen || activeCase?.status === "finished"}
+          disabled={!allSelected || isSubmitting || isModalOpen || activeCase.status === "finished"}
           className={`w-full rounded-lg px-6 py-4 font-bold text-base transition-all duration-200 shadow-lg ${
-            allSelected && !isSubmitting && !isModalOpen && activeCase?.status !== "finished"
+            allSelected && !isSubmitting && !isModalOpen && activeCase.status !== "finished"
               ? "bg-white text-black hover:bg-zinc-200 hover:shadow-xl hover:shadow-white/10 active:scale-[0.98]"
               : "bg-zinc-800 text-zinc-500 cursor-not-allowed shadow-black/20"
           }`}
           title={!allSelected ? textsTR.grid.submitDisabledHint : ""}
         >
-          {activeCase?.status === "finished" ? (
+          {activeCase.status === "finished" ? (
             "Vaka Tamamlandı ✓"
           ) : isSubmitting ? (
             textsTR.common.loading
