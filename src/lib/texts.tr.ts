@@ -134,6 +134,30 @@ export const textsTR = {
     submitReport: "Raporu Gönder",
     submitDisabledHint: "Tüm alanları doldurun",
   },
+  result: {
+    success: {
+      title: "Tebrikler!",
+      message: "Vakayı başarıyla çözdünüz!",
+    },
+    failure: {
+      title: "Yanlış Çözüm",
+      message: "Seçimleriniz doğru değil. Kanıtları tekrar gözden geçirin.",
+    },
+    stats: {
+      duration: "Süre",
+      attempts: "Deneme Sayısı",
+    },
+    actions: {
+      retry: "Tekrar Dene",
+      dashboard: "Dashboard'a Dön",
+      nextCase: "Sonraki Vaka",
+    },
+    validation: {
+      wrongSuspect: "Yanlış şüpheli seçtiniz.",
+      wrongLocation: "Yanlış konum seçtiniz.",
+      wrongWeapon: "Yanlış silah seçtiniz.",
+    },
+  },
   difficulty: {
     label: "Zorluk:",
     easy: "Kolay",
