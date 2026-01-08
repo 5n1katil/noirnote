@@ -14,6 +14,8 @@ import InvestigationGrid from "@/components/InvestigationGrid";
 import ResultModal from "./ResultModal";
 import { saveCaseResult } from "@/lib/caseResult.client";
 import { getActiveCase, saveActiveCase, initializeActiveCase, type ActiveCase } from "@/lib/activeCase.client";
+import { calculateCaseScore } from "@/lib/scoring";
+import { processCaseCompletion } from "@/lib/leaderboard.client";
 
 type CaseClientProps = {
   caseData: Case;
@@ -172,6 +174,10 @@ export default function CaseClient({ caseData }: CaseClientProps) {
     if (isCorrect) {
       // Correct solution
       newStatus = "finished";
+      
+      // Calculate score
+      const score = calculateCaseScore(durationMs, newAttempts, caseData.difficulty);
+      
       const updated = {
         ...activeCase,
         status: newStatus,
@@ -197,8 +203,20 @@ export default function CaseClient({ caseData }: CaseClientProps) {
       saveActiveCase(updated).catch((error) => {
         console.error("[CaseClient] Failed to save active case:", error);
       });
-      saveCaseResult(caseData.id, durationMs, activeCase.penaltyMs, newAttempts, true).catch((error) => {
+      saveCaseResult(caseData.id, durationMs, activeCase.penaltyMs, newAttempts, true, score).catch((error) => {
         console.error("[CaseClient] Failed to save result:", error);
+      });
+
+      // Process case completion (update stats and leaderboards) - non-blocking
+      processCaseCompletion(
+        caseData.id,
+        caseData.difficulty,
+        durationMs,
+        activeCase.penaltyMs,
+        newAttempts,
+        score
+      ).catch((error) => {
+        console.error("[CaseClient] Failed to process case completion:", error);
       });
     } else {
       // Wrong solution - apply penalty

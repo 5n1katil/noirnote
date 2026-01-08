@@ -16,6 +16,7 @@ export type CaseResult = {
   penaltyMs: number; // Total penalty time in milliseconds
   attempts: number;
   isWin: boolean; // true if correct solution
+  score?: number; // Calculated score (only for wins)
   createdAt: unknown; // serverTimestamp placeholder
 };
 
@@ -28,7 +29,8 @@ export async function saveCaseResult(
   durationMs: number,
   penaltyMs: number,
   attempts: number,
-  isWin: boolean
+  isWin: boolean,
+  score?: number
 ): Promise<void> {
   const { auth, db } = getFirebaseClient();
 
@@ -46,6 +48,7 @@ export async function saveCaseResult(
         penaltyMs,
         attempts,
         isWin,
+        score: isWin ? score : undefined,
         createdAt: serverTimestamp(),
       };
 
@@ -91,6 +94,7 @@ export async function saveCaseResult(
           penaltyMs,
           attempts,
           isWin,
+          score: isWin ? score : undefined,
           createdAt: serverTimestamp(),
         };
 
