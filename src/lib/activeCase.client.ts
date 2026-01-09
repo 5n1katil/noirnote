@@ -9,6 +9,22 @@ import { onAuthStateChanged, type User } from "firebase/auth";
 import { getFirebaseClient } from "@/lib/firebase.client";
 import type { GridState } from "@/types/grid";
 
+/**
+ * Firestore document type (with serialized gridState)
+ */
+export type ActiveCaseDoc = {
+  caseId: string;
+  status: "playing" | "finished";
+  startedAt: number; // Timestamp (milliseconds)
+  attempts: number;
+  penaltyMs: number; // Total penalty time in milliseconds
+  gridStateSerialized: string; // JSON string of GridState (Firestore doesn't support nested arrays)
+  updatedAt: unknown; // serverTimestamp placeholder
+};
+
+/**
+ * Application type (with deserialized gridState)
+ */
 export type ActiveCase = {
   caseId: string;
   status: "playing" | "finished";
@@ -20,6 +36,30 @@ export type ActiveCase = {
 };
 
 /**
+ * Serialize GridState to JSON string for Firestore
+ */
+function serializeGridState(gridState: GridState): string {
+  return JSON.stringify(gridState);
+}
+
+/**
+ * Deserialize JSON string to GridState from Firestore
+ */
+function deserializeGridState(serialized: string): GridState {
+  try {
+    return JSON.parse(serialized) as GridState;
+  } catch (error) {
+    console.error("[activeCase] Failed to deserialize gridState:", error);
+    // Return default empty grid state on error
+    return {
+      SL: Array(3).fill(null).map(() => Array(3).fill("empty")),
+      SW: Array(3).fill(null).map(() => Array(3).fill("empty")),
+      LW: Array(3).fill(null).map(() => Array(3).fill("empty")),
+    } as GridState;
+  }
+}
+
+/**
  * Get active case for current user
  */
 export async function getActiveCase(caseId: string): Promise<ActiveCase | null> {
@@ -27,18 +67,23 @@ export async function getActiveCase(caseId: string): Promise<ActiveCase | null> 
 
   // Check if user is already authenticated (faster path)
   if (auth.currentUser) {
-    try {
-      const ref = doc(db, "users", auth.currentUser.uid, "activeCase", caseId);
-      const snap = await getDoc(ref);
+      try {
+        const ref = doc(db, "users", auth.currentUser.uid, "activeCase", caseId);
+        const snap = await getDoc(ref);
 
-      if (snap.exists()) {
-        return snap.data() as ActiveCase;
+        if (snap.exists()) {
+          const data = snap.data() as ActiveCaseDoc;
+          // Convert Firestore document to application type (deserialize gridState)
+          return {
+            ...data,
+            gridState: deserializeGridState(data.gridStateSerialized),
+          };
+        }
+        return null;
+      } catch (error) {
+        console.error("[activeCase] Failed to get active case:", error);
+        throw error;
       }
-      return null;
-    } catch (error) {
-      console.error("[activeCase] Failed to get active case:", error);
-      throw error;
-    }
   }
 
   // Wait for auth state if not ready yet
@@ -68,7 +113,12 @@ export async function getActiveCase(caseId: string): Promise<ActiveCase | null> 
         const snap = await getDoc(ref);
 
         if (snap.exists()) {
-          resolve(snap.data() as ActiveCase);
+          const data = snap.data() as ActiveCaseDoc;
+          // Convert Firestore document to application type (deserialize gridState)
+          resolve({
+            ...data,
+            gridState: deserializeGridState(data.gridStateSerialized),
+          });
         } else {
           resolve(null);
         }
@@ -90,10 +140,19 @@ export async function saveActiveCase(activeCase: Omit<ActiveCase, "updatedAt">):
   if (auth.currentUser) {
     try {
       const ref = doc(db, "users", auth.currentUser.uid, "activeCase", activeCase.caseId);
+      // Convert application type to Firestore document (serialize gridState)
+      const docData: Omit<ActiveCaseDoc, "updatedAt"> = {
+        caseId: activeCase.caseId,
+        status: activeCase.status,
+        startedAt: activeCase.startedAt,
+        attempts: activeCase.attempts,
+        penaltyMs: activeCase.penaltyMs,
+        gridStateSerialized: serializeGridState(activeCase.gridState),
+      };
       await setDoc(
         ref,
         {
-          ...activeCase,
+          ...docData,
           updatedAt: serverTimestamp(),
         },
         { merge: true }
@@ -129,10 +188,19 @@ export async function saveActiveCase(activeCase: Omit<ActiveCase, "updatedAt">):
 
       try {
         const ref = doc(db, "users", user.uid, "activeCase", activeCase.caseId);
+        // Convert application type to Firestore document (serialize gridState)
+        const docData: Omit<ActiveCaseDoc, "updatedAt"> = {
+          caseId: activeCase.caseId,
+          status: activeCase.status,
+          startedAt: activeCase.startedAt,
+          attempts: activeCase.attempts,
+          penaltyMs: activeCase.penaltyMs,
+          gridStateSerialized: serializeGridState(activeCase.gridState),
+        };
         await setDoc(
           ref,
           {
-            ...activeCase,
+            ...docData,
             updatedAt: serverTimestamp(),
           },
           { merge: true }

@@ -8,7 +8,20 @@
 
 import { useEffect, useState } from "react";
 import { onAuthStateChanged, type User } from "firebase/auth";
-import { collection, query, where, getDocs, onSnapshot, doc, getDoc, limit } from "firebase/firestore";
+import { 
+  collection, 
+  query, 
+  where, 
+  getDocs, 
+  onSnapshot, 
+  doc, 
+  getDoc, 
+  limit,
+  getDocFromCache,
+  getDocsFromCache,
+  enableNetwork,
+  disableNetwork
+} from "firebase/firestore";
 import { getFirebaseClient } from "@/lib/firebase.client";
 import { getUserStats, type UserStats } from "@/lib/userStats.client";
 import { getCaseById } from "@/lib/cases";
@@ -105,11 +118,37 @@ export default function ProfileClient() {
         // Helper functions for loading and processing data
         async function loadStats(): Promise<UserStats | null> {
           try {
-            const statsSnap = await getDoc(statsRef);
-            // With persistence enabled, getDoc automatically uses cache if available
-            // First load: network (~100-300ms), Subsequent loads: cache (<10ms)
-            if (statsSnap.exists()) {
-              return statsSnap.data() as UserStats;
+            // Strategy: Try cache first (offline-friendly), fallback to network
+            let statsSnap;
+            try {
+              // Try cache first (instant if available, works offline)
+              statsSnap = await getDocFromCache(statsRef);
+              if (statsSnap.exists()) {
+                return statsSnap.data() as UserStats;
+              }
+            } catch (cacheError: any) {
+              // Cache miss or offline, try network if online
+              // If error is "client is offline", skip network attempt
+              if (cacheError?.code === "unavailable" || cacheError?.message?.includes("offline")) {
+                console.warn("[ProfileClient] Offline mode: cache miss for stats");
+                return null;
+              }
+              // Try network (if online)
+              try {
+                statsSnap = await getDoc(statsRef);
+                // With persistence enabled, getDoc automatically uses cache if available
+                // First load: network (~100-300ms), Subsequent loads: cache (<10ms)
+                if (statsSnap.exists()) {
+                  return statsSnap.data() as UserStats;
+                }
+              } catch (networkError: any) {
+                // Network error (offline), return null gracefully
+                if (networkError?.code === "unavailable" || networkError?.message?.includes("offline")) {
+                  console.warn("[ProfileClient] Offline mode: cannot load stats from network");
+                  return null;
+                }
+                throw networkError;
+              }
             }
             return null;
           } catch (error) {
@@ -120,20 +159,55 @@ export default function ProfileClient() {
 
         async function loadResults(): Promise<CaseResultWithDetails[]> {
           try {
-            const resultsSnapshot = await getDocs(resultsQuery);
-            // With persistence enabled, getDocs automatically uses cache if available
-            const results: CaseResultWithDetails[] = [];
-            resultsSnapshot.forEach((docSnap) => {
-              const data = docSnap.data() as CaseResult;
-              const caseData = getCaseById(data.caseId);
-              results.push({
-                ...data,
-                caseTitle: caseData ? getText(caseData.titleKey) : data.caseId,
+            // Strategy: Try cache first (offline-friendly), fallback to network
+            let resultsSnapshot;
+            try {
+              // Try cache first (instant if available, works offline)
+              resultsSnapshot = await getDocsFromCache(resultsQuery);
+              const results: CaseResultWithDetails[] = [];
+              resultsSnapshot.forEach((docSnap) => {
+                const data = docSnap.data() as CaseResult;
+                const caseData = getCaseById(data.caseId);
+                results.push({
+                  ...data,
+                  caseTitle: caseData ? getText(caseData.titleKey) : data.caseId,
+                });
               });
-            });
-            // Sort by finishedAt descending (most recent first)
-            results.sort((a, b) => b.finishedAt - a.finishedAt);
-            return results;
+              // Sort by finishedAt descending (most recent first)
+              results.sort((a, b) => b.finishedAt - a.finishedAt);
+              return results;
+            } catch (cacheError: any) {
+              // Cache miss or offline, try network if online
+              // If error is "client is offline", skip network attempt
+              if (cacheError?.code === "unavailable" || cacheError?.message?.includes("offline")) {
+                console.warn("[ProfileClient] Offline mode: cache miss for results");
+                return [];
+              }
+              // Try network (if online)
+              try {
+                resultsSnapshot = await getDocs(resultsQuery);
+                // With persistence enabled, getDocs automatically uses cache if available
+                const results: CaseResultWithDetails[] = [];
+                resultsSnapshot.forEach((docSnap) => {
+                  const data = docSnap.data() as CaseResult;
+                  const caseData = getCaseById(data.caseId);
+                  results.push({
+                    ...data,
+                    caseTitle: caseData ? getText(caseData.titleKey) : data.caseId,
+                  });
+                });
+                // Sort by finishedAt descending (most recent first)
+                results.sort((a, b) => b.finishedAt - a.finishedAt);
+                return results;
+              } catch (networkError: any) {
+                // Network error (offline), return empty array gracefully
+                if (networkError?.code === "unavailable" || networkError?.message?.includes("offline")) {
+                  console.warn("[ProfileClient] Offline mode: cannot load results from network");
+                  return [];
+                }
+                throw networkError;
+              }
+            }
           } catch (error) {
             console.error("[ProfileClient] Failed to load results:", error);
             return [];

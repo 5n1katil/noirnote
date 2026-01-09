@@ -4,7 +4,7 @@
  * Client-side utility for saving case completion results to Firestore.
  */
 
-import { doc, setDoc, serverTimestamp } from "firebase/firestore";
+import { doc, setDoc, serverTimestamp, waitForPendingWrites } from "firebase/firestore";
 import { onAuthStateChanged, type User } from "firebase/auth";
 import { getFirebaseClient } from "@/lib/firebase.client";
 
@@ -52,9 +52,31 @@ export async function saveCaseResult(
         createdAt: serverTimestamp(),
       };
 
+      // With Firestore persistence enabled, setDoc will queue writes offline
+      // and automatically sync when network is available
       await setDoc(ref, data, { merge: true });
+      
+      // Try to wait for write to complete (works online)
+      // Offline writes are automatically queued by Firestore SDK
+      try {
+        await waitForPendingWrites(db);
+      } catch (waitError: any) {
+        // If offline, waitForPendingWrites may timeout - that's OK, write is queued
+        if (waitError?.code === "unavailable" || waitError?.message?.includes("offline")) {
+          console.log("[caseResult] Write queued offline, will sync when online");
+        } else {
+          // Other error, log but don't fail the operation
+          console.warn("[caseResult] Failed to wait for pending writes:", waitError);
+        }
+      }
       return;
-    } catch (error) {
+    } catch (error: any) {
+      // Offline errors are expected and handled by Firestore persistence
+      if (error?.code === "unavailable" || error?.message?.includes("offline")) {
+        console.log("[caseResult] Result save queued offline, will sync when online");
+        // Don't throw - Firestore persistence will handle the sync
+        return;
+      }
       console.error("[caseResult] Failed to save result:", error);
       throw error;
     }
@@ -98,9 +120,32 @@ export async function saveCaseResult(
           createdAt: serverTimestamp(),
         };
 
+        // With Firestore persistence enabled, setDoc will queue writes offline
+        // and automatically sync when network is available
         await setDoc(ref, data, { merge: true });
+        
+        // Try to wait for write to complete (works online)
+        // Offline writes are automatically queued by Firestore SDK
+        try {
+          await waitForPendingWrites(db);
+        } catch (waitError: any) {
+          // If offline, waitForPendingWrites may timeout - that's OK, write is queued
+          if (waitError?.code === "unavailable" || waitError?.message?.includes("offline")) {
+            console.log("[caseResult] Write queued offline, will sync when online");
+          } else {
+            // Other error, log but don't fail the operation
+            console.warn("[caseResult] Failed to wait for pending writes:", waitError);
+          }
+        }
         resolve();
-      } catch (error) {
+      } catch (error: any) {
+        // Offline errors are expected and handled by Firestore persistence
+        if (error?.code === "unavailable" || error?.message?.includes("offline")) {
+          console.log("[caseResult] Result save queued offline, will sync when online");
+          // Don't throw - Firestore persistence will handle the sync
+          resolve();
+          return;
+        }
         console.error("[caseResult] Failed to save result:", error);
         reject(error);
       }
