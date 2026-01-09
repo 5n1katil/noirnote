@@ -107,31 +107,41 @@ export async function updateCaseLeaderboard(
   const { db } = getFirebaseClient();
 
   try {
+    // CRITICAL: Only update leaderboard on first attempt (attempts === 1)
+    // Subsequent attempts should not update the leaderboard, only the profile stats
+    if (attempts !== 1) {
+      console.log("[leaderboard] Skipping leaderboard update - not first attempt (attempts:", attempts, ")");
+      return;
+    }
+
+    console.log("[leaderboard] Updating case leaderboard for first attempt:", { caseId, uid, score, attempts });
+
     const ref = doc(db, "leaderboard", caseId, "entries", uid);
     
-    // Check if existing entry exists and compare scores (try cache first for offline support)
+    // Check if existing entry exists (first attempt already recorded)
     let existing;
     try {
       // Try cache first (works offline)
       existing = await getDoc(ref);
     } catch (cacheError: any) {
-      // If cache miss and offline, skip comparison and allow update
-      // This ensures new scores are recorded even when offline
+      // If cache miss and offline, allow update to proceed (first attempt should be recorded)
+      // This ensures first attempt scores are recorded even when offline
       if (cacheError?.code === "unavailable" || cacheError?.message?.includes("offline")) {
-        console.log("[leaderboard] Offline mode: skipping score comparison, will update");
+        console.log("[leaderboard] Offline mode: cache miss, will create first attempt entry");
         existing = null as any; // Allow update to proceed
       } else {
         throw cacheError;
       }
     }
     
+    // If existing entry exists, first attempt already recorded - skip update
     if (existing?.exists()) {
       const existingData = existing.data() as LeaderboardEntry;
-      // Only update if new score is better (higher)
-      if (existingData.score >= score) {
-        return; // Don't update if existing score is better or equal
-      }
+      console.log("[leaderboard] First attempt already recorded for this case, skipping update. Existing score:", existingData.score);
+      return; // Don't update if first attempt already recorded
     }
+
+    console.log("[leaderboard] Creating new leaderboard entry for first attempt:", { caseId, uid, score, durationMs, attempts });
 
     // With Firestore persistence enabled, setDoc will queue writes offline
     // and automatically sync when network is available
@@ -367,7 +377,9 @@ async function processWithUser(
   }
 
   // Update case-specific leaderboard (offline-friendly)
+  // NOTE: updateCaseLeaderboard will only update if attempts === 1 (first attempt only)
   try {
+    console.log("[leaderboard] Attempting to update case-specific leaderboard:", { caseId, attempts, score });
     await updateCaseLeaderboard(
       user.uid,
       user.displayName || user.email || "Kullanıcı",
@@ -377,7 +389,11 @@ async function processWithUser(
       durationMs,
       attempts
     );
-    console.log("[leaderboard] Case-specific leaderboard updated successfully");
+    if (attempts === 1) {
+      console.log("[leaderboard] Case-specific leaderboard updated successfully (first attempt)");
+    } else {
+      console.log("[leaderboard] Case-specific leaderboard update skipped (not first attempt)");
+    }
   } catch (error: any) {
     // Offline errors are already handled in updateCaseLeaderboard
     // Other errors should be logged but not fail the entire process
@@ -385,7 +401,7 @@ async function processWithUser(
       console.log("[leaderboard] Case leaderboard update queued offline");
     } else {
       console.error("[leaderboard] Failed to update case-specific leaderboard:", error);
-      // Don't throw - process can continue
+      // Don't throw - process can continue (stats and global leaderboard are more important)
     }
   }
   
