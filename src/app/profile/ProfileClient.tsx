@@ -29,7 +29,6 @@ import { getCaseById } from "@/lib/cases";
 import { getText } from "@/lib/text-resolver";
 import { textsTR } from "@/lib/texts.tr";
 import type { CaseResult } from "@/lib/caseResult.client";
-import { clearMyResults } from "@/lib/clearResults.client";
 
 type CaseResultWithDetails = CaseResult & {
   caseTitle?: string;
@@ -63,7 +62,6 @@ export default function ProfileClient() {
   const [caseResults, setCaseResults] = useState<CaseResultWithDetails[]>([]);
   const [statsLoading, setStatsLoading] = useState(true);
   const [resultsLoading, setResultsLoading] = useState(true);
-  const [clearingHistory, setClearingHistory] = useState(false);
 
   useEffect(() => {
     const { auth, db } = getFirebaseClient();
@@ -355,42 +353,10 @@ export default function ProfileClient() {
 
       {/* Case Results */}
       <div className="rounded-xl border border-zinc-800 bg-gradient-to-br from-zinc-900 to-zinc-950 p-6 shadow-lg shadow-black/20">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl font-bold text-white flex items-center gap-2">
-            <span className="text-2xl">🏆</span>
-            {textsTR.profile.caseResults}
-          </h2>
-          {caseResults.length > 0 && (
-            <button
-              onClick={async () => {
-                if (!confirm(textsTR.profile.clearHistoryConfirm)) {
-                  return;
-                }
-                setClearingHistory(true);
-                try {
-                  const result = await clearMyResults();
-                  if (result.error) {
-                    alert(textsTR.profile.clearHistoryError + ": " + result.error);
-                  } else {
-                    alert(textsTR.profile.clearHistorySuccess);
-                    setCaseResults([]);
-                    // Refresh the page to update UI
-                    window.location.reload();
-                  }
-                } catch (error) {
-                  console.error("[ProfileClient] Failed to clear history:", error);
-                  alert(textsTR.profile.clearHistoryError);
-                } finally {
-                  setClearingHistory(false);
-                }
-              }}
-              disabled={clearingHistory || resultsLoading}
-              className="px-4 py-2 text-sm font-medium text-red-400 border border-red-400/30 rounded-lg hover:bg-red-400/10 hover:border-red-400/50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {clearingHistory ? textsTR.common.loading : textsTR.profile.clearHistory}
-            </button>
-          )}
-        </div>
+        <h2 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
+          <span className="text-2xl">🏆</span>
+          {textsTR.profile.caseResults}
+        </h2>
         {resultsLoading ? (
           <div className="text-center py-8 text-zinc-400">
             <div className="inline-block animate-pulse">{textsTR.common.loading}</div>
