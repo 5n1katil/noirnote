@@ -158,15 +158,17 @@ export async function recalculateUserStats(uid: string): Promise<UserStats | nul
           displayName: currentUser.displayName || currentUser.email || "Kullanıcı",
           totalScore,
           solvedCases,
+          averageTimeMs,
         });
         await updateGlobalLeaderboard(
           uid,
           currentUser.displayName || currentUser.email || "Kullanıcı",
           currentUser.photoURL,
           totalScore,
-          solvedCases
+          solvedCases,
+          averageTimeMs
         );
-        console.log("[recalculateStats] Global leaderboard updated successfully with score:", totalScore, "and cases:", solvedCases);
+        console.log("[recalculateStats] Global leaderboard updated successfully with score:", totalScore, "cases:", solvedCases, "averageTimeMs:", averageTimeMs);
       } catch (error: any) {
         console.error("[recalculateStats] Failed to update global leaderboard:", error);
         // Don't throw - stats are already updated, leaderboard can be updated later

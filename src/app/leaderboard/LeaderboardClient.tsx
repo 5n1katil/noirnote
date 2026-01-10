@@ -255,9 +255,14 @@ export default function LeaderboardClient() {
                     {textsTR.leaderboard.score}
                   </th>
                   {selectedCaseId === "global" ? (
-                    <th className="text-right py-3 px-4 text-xs font-semibold text-zinc-500 uppercase">
-                      {textsTR.leaderboard.cases}
-                    </th>
+                    <>
+                      <th className="text-right py-3 px-4 text-xs font-semibold text-zinc-500 uppercase">
+                        {textsTR.leaderboard.cases}
+                      </th>
+                      <th className="text-right py-3 px-4 text-xs font-semibold text-zinc-500 uppercase">
+                        {textsTR.profile.averageTime}
+                      </th>
+                    </>
                   ) : (
                     <>
                       <th className="text-right py-3 px-4 text-xs font-semibold text-zinc-500 uppercase">
@@ -304,9 +309,16 @@ export default function LeaderboardClient() {
                       </span>
                     </td>
                     {selectedCaseId === "global" ? (
-                      <td className="py-4 px-4 text-right">
-                        <span className="text-white">{entry.solvedCases || 0}</span>
-                      </td>
+                      <>
+                        <td className="py-4 px-4 text-right">
+                          <span className="text-white">{entry.solvedCases || 0}</span>
+                        </td>
+                        <td className="py-4 px-4 text-right">
+                          <span className="text-white">
+                            {entry.averageTimeMs ? formatDuration(entry.averageTimeMs) : "-"}
+                          </span>
+                        </td>
+                      </>
                     ) : (
                       <>
                         <td className="py-4 px-4 text-right">

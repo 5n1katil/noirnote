@@ -34,6 +34,7 @@ export type LeaderboardEntry = {
   durationMs?: number; // For case-specific leaderboards
   attempts?: number; // For case-specific leaderboards
   solvedCases?: number; // For global leaderboard
+  averageTimeMs?: number; // For global leaderboard (average of first successful attempts)
   rank?: number; // Calculated on client
   updatedAt: unknown; // serverTimestamp placeholder
 };
@@ -46,32 +47,41 @@ export async function updateGlobalLeaderboard(
   displayName: string,
   photoURL: string | null,
   totalScore: number,
-  solvedCases: number
+  solvedCases: number,
+  averageTimeMs?: number
 ): Promise<void> {
   const { db } = getFirebaseClient();
 
   try {
     const ref = doc(db, "leaderboard", "global", "entries", uid);
     
+    const leaderboardData: any = {
+      uid,
+      displayName,
+      photoURL: photoURL ?? null,
+      score: totalScore,
+      solvedCases,
+      updatedAt: serverTimestamp(),
+    };
+
+    // Only add averageTimeMs if provided and valid
+    if (averageTimeMs !== undefined && averageTimeMs !== null && !isNaN(averageTimeMs) && isFinite(averageTimeMs) && averageTimeMs >= 0) {
+      leaderboardData.averageTimeMs = Math.round(averageTimeMs);
+    }
+
     console.log("[leaderboard] Updating global leaderboard entry:", {
       uid,
       displayName,
       score: totalScore,
       solvedCases,
+      averageTimeMs: leaderboardData.averageTimeMs,
     });
     
     // With Firestore persistence enabled, setDoc will queue writes offline
     // and automatically sync when network is available
     await setDoc(
       ref,
-      {
-        uid,
-        displayName,
-        photoURL: photoURL ?? null,
-        score: totalScore,
-        solvedCases,
-        updatedAt: serverTimestamp(),
-      },
+      leaderboardData,
       { merge: true }
     );
     
@@ -79,6 +89,7 @@ export async function updateGlobalLeaderboard(
       uid,
       score: totalScore,
       solvedCases,
+      averageTimeMs: leaderboardData.averageTimeMs,
     });
     
     // Try to wait for write to complete (works online)
@@ -414,11 +425,13 @@ async function processWithUser(
   // Ensure stats values are valid numbers
   const validTotalScore = stats.totalScore !== undefined && stats.totalScore !== null && !isNaN(stats.totalScore) ? stats.totalScore : 0;
   const validSolvedCases = stats.solvedCases !== undefined && stats.solvedCases !== null && !isNaN(stats.solvedCases) ? stats.solvedCases : 0;
+  const validAverageTimeMs = stats.averageTimeMs !== undefined && stats.averageTimeMs !== null && !isNaN(stats.averageTimeMs) && stats.averageTimeMs >= 0 ? stats.averageTimeMs : undefined;
   
   console.log("[leaderboard] Updating global leaderboard with stats:", {
     uid: user.uid,
     totalScore: validTotalScore,
     solvedCases: validSolvedCases,
+    averageTimeMs: validAverageTimeMs,
     displayName: user.displayName || user.email || "Kullanıcı",
   });
 
@@ -431,11 +444,13 @@ async function processWithUser(
       user.displayName || user.email || "Kullanıcı",
       user.photoURL,
       validTotalScore,
-      validSolvedCases
+      validSolvedCases,
+      validAverageTimeMs
     );
     console.log("[leaderboard] Global leaderboard updated successfully with:", {
       score: validTotalScore,
       cases: validSolvedCases,
+      averageTimeMs: validAverageTimeMs,
     });
   } catch (error: any) {
     // Offline errors are already handled in updateGlobalLeaderboard
