@@ -199,19 +199,19 @@ export default function LNotebookGrid({
   );
 
   return (
-    <div className="inline-block overflow-x-auto">
+    <div className="inline-block overflow-x-auto w-full">
       {/* Unified L-shaped grid container */}
-      <div className="border-4 border-zinc-700 bg-zinc-950 rounded-lg overflow-hidden inline-block">
-        <table className="border-collapse">
+      <div className="border-2 sm:border-4 border-zinc-700 bg-zinc-950 rounded-lg overflow-hidden inline-block min-w-full sm:min-w-0">
+        <table className="border-collapse w-full">
           {/* Top header row: KİM icons (3) then NEREDE icons (3) */}
           <thead>
             <tr>
-              <th className="w-12 h-12 border-r border-b border-zinc-700"></th>
+              <th className="w-10 h-10 sm:w-12 sm:h-12 border-r border-b border-zinc-700"></th>
               {/* KİM icons */}
               {suspects.map((suspect) => (
                 <th
                   key={suspect.id}
-                  className="w-16 h-12 p-1 border-r border-b border-zinc-700"
+                  className="w-14 h-10 sm:w-16 sm:h-12 p-0.5 sm:p-1 border-r border-b border-zinc-700"
                 >
                   {onHeaderClick ? (
                     <button
@@ -219,11 +219,11 @@ export default function LNotebookGrid({
                       className="w-full h-full flex items-center justify-center hover:bg-zinc-800 transition-colors rounded"
                       title={getText(suspect.nameKey)}
                     >
-                      <span className="text-xl">{getText(suspect.iconKey)}</span>
+                      <span className="text-lg sm:text-xl">{getText(suspect.iconKey)}</span>
                     </button>
                   ) : (
                     <div className="w-full h-full flex items-center justify-center" title={getText(suspect.nameKey)}>
-                      <span className="text-xl">{getText(suspect.iconKey)}</span>
+                      <span className="text-lg sm:text-xl">{getText(suspect.iconKey)}</span>
                     </div>
                   )}
                 </th>
@@ -232,8 +232,8 @@ export default function LNotebookGrid({
               {locations.map((location) => (
                 <th
                   key={location.id}
-                  className={`w-16 h-12 p-1 border-r border-b border-zinc-700 ${
-                    locations.indexOf(location) === locations.length - 1 ? "border-r-4" : ""
+                  className={`w-14 h-10 sm:w-16 sm:h-12 p-0.5 sm:p-1 border-r border-b border-zinc-700 ${
+                    locations.indexOf(location) === locations.length - 1 ? "border-r-2 sm:border-r-4" : ""
                   }`}
                 >
                   {onHeaderClick ? (
@@ -242,11 +242,11 @@ export default function LNotebookGrid({
                       className="w-full h-full flex items-center justify-center hover:bg-zinc-800 transition-colors rounded"
                       title={getText(location.nameKey)}
                     >
-                      <span className="text-xl">{getText(location.iconKey)}</span>
+                      <span className="text-lg sm:text-xl">{getText(location.iconKey)}</span>
                     </button>
                   ) : (
                     <div className="w-full h-full flex items-center justify-center" title={getText(location.nameKey)}>
-                      <span className="text-xl">{getText(location.iconKey)}</span>
+                      <span className="text-lg sm:text-xl">{getText(location.iconKey)}</span>
                     </div>
                   )}
                 </th>
@@ -258,18 +258,18 @@ export default function LNotebookGrid({
             {weapons.map((weapon, weaponIdx) => (
               <tr key={weapon.id}>
                 {/* Left header: NEYLE icon */}
-                <td className="w-12 h-16 p-1 border-r border-b border-zinc-700">
+                <td className="w-10 h-14 sm:w-12 sm:h-16 p-0.5 sm:p-1 border-r border-b border-zinc-700">
                   {onHeaderClick ? (
                     <button
                       onClick={() => onHeaderClick("weapon", weapon.id)}
                       className="w-full h-full flex items-center justify-center hover:bg-zinc-800 transition-colors rounded"
                       title={getText(weapon.nameKey)}
                     >
-                      <span className="text-xl">{getText(weapon.iconKey)}</span>
+                      <span className="text-lg sm:text-xl">{getText(weapon.iconKey)}</span>
                     </button>
                   ) : (
                     <div className="w-full h-full flex items-center justify-center" title={getText(weapon.nameKey)}>
-                      <span className="text-xl">{getText(weapon.iconKey)}</span>
+                      <span className="text-lg sm:text-xl">{getText(weapon.iconKey)}</span>
                     </div>
                   )}
                 </td>
@@ -283,7 +283,7 @@ export default function LNotebookGrid({
                   return (
                     <td
                       key={`sw-${suspectIdx}`}
-                      className="w-16 h-16 p-1 border-r border-b border-zinc-700 relative"
+                      className="w-14 h-14 sm:w-16 sm:h-16 p-0.5 sm:p-1 border-r border-b border-zinc-700 relative"
                     >
                       <button
                         onClick={() => handleCellClick(visualRow, visualCol)}
@@ -295,7 +295,7 @@ export default function LNotebookGrid({
                         <div className="absolute inset-0 z-0"></div>
                         {display.char && (
                           <span
-                            className={`absolute inset-0 flex items-center justify-center z-10 text-2xl font-bold leading-none text-zinc-100 ${display.textClass}`}
+                            className={`absolute inset-0 flex items-center justify-center z-10 text-lg sm:text-2xl font-bold leading-none text-zinc-100 ${display.textClass}`}
                           >
                             {display.char}
                           </span>
@@ -315,8 +315,8 @@ export default function LNotebookGrid({
                   return (
                     <td
                       key={`lw-${locationIdx}`}
-                      className={`w-16 h-16 p-1 border-r border-b border-zinc-700 relative ${
-                        isLastCol ? "border-r-4" : ""
+                      className={`w-14 h-14 sm:w-16 sm:h-16 p-0.5 sm:p-1 border-r border-b border-zinc-700 relative ${
+                        isLastCol ? "border-r-2 sm:border-r-4" : ""
                       }`}
                     >
                       <button
@@ -329,7 +329,7 @@ export default function LNotebookGrid({
                         <div className="absolute inset-0 z-0"></div>
                         {display.char && (
                           <span
-                            className={`absolute inset-0 flex items-center justify-center z-10 text-2xl font-bold leading-none text-zinc-100 ${display.textClass}`}
+                            className={`absolute inset-0 flex items-center justify-center z-10 text-lg sm:text-2xl font-bold leading-none text-zinc-100 ${display.textClass}`}
                           >
                             {display.char}
                           </span>
@@ -342,24 +342,24 @@ export default function LNotebookGrid({
             ))}
             {/* Divider row between NEYLE and NEREDE sections */}
             <tr>
-              <td colSpan={7} className="h-0 p-0 border-b-4 border-zinc-700"></td>
+              <td colSpan={7} className="h-0 p-0 border-b-2 sm:border-b-4 border-zinc-700"></td>
             </tr>
             {/* NEREDE rows (3-5) */}
             {locations.map((location, locationIdx) => (
               <tr key={location.id}>
                 {/* Left header: NEREDE icon */}
-                <td className="w-12 h-16 p-1 border-r border-b border-zinc-700">
+                <td className="w-10 h-14 sm:w-12 sm:h-16 p-0.5 sm:p-1 border-r border-b border-zinc-700">
                   {onHeaderClick ? (
                     <button
                       onClick={() => onHeaderClick("location", location.id)}
                       className="w-full h-full flex items-center justify-center hover:bg-zinc-800 transition-colors rounded"
                       title={getText(location.nameKey)}
                     >
-                      <span className="text-xl">{getText(location.iconKey)}</span>
+                      <span className="text-lg sm:text-xl">{getText(location.iconKey)}</span>
                     </button>
                   ) : (
                     <div className="w-full h-full flex items-center justify-center" title={getText(location.nameKey)}>
-                      <span className="text-xl">{getText(location.iconKey)}</span>
+                      <span className="text-lg sm:text-xl">{getText(location.iconKey)}</span>
                     </div>
                   )}
                 </td>
@@ -373,7 +373,7 @@ export default function LNotebookGrid({
                   return (
                     <td
                       key={`sl-${suspectIdx}`}
-                      className="w-16 h-16 p-1 border-r border-b border-zinc-700 relative"
+                      className="w-14 h-14 sm:w-16 sm:h-16 p-0.5 sm:p-1 border-r border-b border-zinc-700 relative"
                     >
                       <button
                         onClick={() => handleCellClick(visualRow, visualCol)}
@@ -385,7 +385,7 @@ export default function LNotebookGrid({
                         <div className="absolute inset-0 z-0"></div>
                         {display.char && (
                           <span
-                            className={`absolute inset-0 flex items-center justify-center z-10 text-2xl font-bold leading-none text-zinc-100 ${display.textClass}`}
+                            className={`absolute inset-0 flex items-center justify-center z-10 text-lg sm:text-2xl font-bold leading-none text-zinc-100 ${display.textClass}`}
                           >
                             {display.char}
                           </span>
@@ -400,8 +400,8 @@ export default function LNotebookGrid({
                   return (
                     <td
                       key={`filler-${idx}`}
-                      className={`w-16 h-16 p-1 border-r border-b border-zinc-700 bg-zinc-950 ${
-                        isLastCol ? "border-r-4" : ""
+                      className={`w-14 h-14 sm:w-16 sm:h-16 p-0.5 sm:p-1 border-r border-b border-zinc-700 bg-zinc-950 ${
+                        isLastCol ? "border-r-2 sm:border-r-4" : ""
                       }`}
                     ></td>
                   );

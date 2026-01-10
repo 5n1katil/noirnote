@@ -22,7 +22,7 @@ export default async function CasePage({ params }: CasePageProps) {
   return (
     <AuthGate>
       <AuthedShell title={getText(caseData.titleKey)}>
-        <div className="space-y-6">
+        <div className="space-y-4 sm:space-y-6">
           {/* Header with back button and difficulty */}
           <div>
             <div className="flex items-center gap-3 mb-4">

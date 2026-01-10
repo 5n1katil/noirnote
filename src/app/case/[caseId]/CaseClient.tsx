@@ -290,15 +290,15 @@ export default function CaseClient({ caseData }: CaseClientProps) {
   // UI is always shown immediately (optimistic rendering)
   return (
     <>
-      <div className={`space-y-8 ${isModalOpen ? "pointer-events-none opacity-50" : ""}`}>
+      <div className={`space-y-4 sm:space-y-6 lg:space-y-8 ${isModalOpen ? "pointer-events-none opacity-50" : ""}`}>
         {/* Timer Display */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <div className="rounded-lg border border-zinc-800 bg-zinc-950/50 px-4 py-2">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-4">
+          <div className="flex items-center gap-2 sm:gap-4 flex-wrap">
+            <div className="rounded-lg border border-zinc-800 bg-zinc-950/50 px-3 sm:px-4 py-1.5 sm:py-2">
               <span className="text-xs text-zinc-400 mr-2">⏱️ Süre:</span>
-              <span className="text-sm font-semibold text-white">{formatDuration(currentDuration)}</span>
+              <span className="text-xs sm:text-sm font-semibold text-white">{formatDuration(currentDuration)}</span>
             </div>
-            <div className="rounded-lg border border-zinc-800 bg-zinc-950/50 px-4 py-2">
+            <div className="rounded-lg border border-zinc-800 bg-zinc-950/50 px-3 sm:px-4 py-1.5 sm:py-2">
               <span className="text-xs text-zinc-400 mr-2">🎯 Denemeler:</span>
               <span className="text-sm font-semibold text-white">{activeCase.attempts}</span>
             </div>
@@ -314,13 +314,13 @@ export default function CaseClient({ caseData }: CaseClientProps) {
         </div>
 
         {/* Two-column layout: Left (briefing + clues) | Right (grid) */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 lg:gap-8">
           {/* Left Column: Briefing + Clues */}
-          <div className="space-y-6">
+          <div className="space-y-4 sm:space-y-6">
             {/* Briefing */}
-            <div className="rounded-xl border border-zinc-800 bg-gradient-to-br from-zinc-900 to-zinc-950 p-6 shadow-lg shadow-black/20">
-              <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
-                <span className="text-2xl">📄</span>
+            <div className="rounded-xl border border-zinc-800 bg-gradient-to-br from-zinc-900 to-zinc-950 p-4 sm:p-6 shadow-lg shadow-black/20">
+              <h2 className="text-lg sm:text-xl font-bold text-white mb-3 sm:mb-4 flex items-center gap-2">
+                <span className="text-xl sm:text-2xl">📄</span>
                 {textsTR.cases.briefing}
               </h2>
               <div className="rounded-lg border border-zinc-800 bg-zinc-950/50 p-5 text-sm text-zinc-300 leading-relaxed">
@@ -329,16 +329,16 @@ export default function CaseClient({ caseData }: CaseClientProps) {
             </div>
 
             {/* Clues */}
-            <div className="rounded-xl border border-zinc-800 bg-gradient-to-br from-zinc-900 to-zinc-950 p-6 shadow-lg shadow-black/20">
-              <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
-                <span className="text-2xl">🔍</span>
+            <div className="rounded-xl border border-zinc-800 bg-gradient-to-br from-zinc-900 to-zinc-950 p-4 sm:p-6 shadow-lg shadow-black/20">
+              <h2 className="text-lg sm:text-xl font-bold text-white mb-3 sm:mb-4 flex items-center gap-2">
+                <span className="text-xl sm:text-2xl">🔍</span>
                 {textsTR.cases.clues}
               </h2>
               <ul className="space-y-3">
                 {caseData.clues.map((clueKey, index) => (
                   <li
                     key={index}
-                    className="group rounded-lg border border-zinc-800 bg-zinc-950/50 p-4 text-sm text-zinc-300 hover:border-zinc-700 hover:bg-zinc-900/50 transition-all duration-200"
+                    className="group rounded-lg border border-zinc-800 bg-zinc-950/50 p-3 sm:p-4 text-xs sm:text-sm text-zinc-300 hover:border-zinc-700 hover:bg-zinc-900/50 transition-all duration-200"
                   >
                     <div className="flex items-start gap-3">
                       <span className="flex-shrink-0 w-6 h-6 rounded-full bg-zinc-800 text-zinc-500 flex items-center justify-center text-xs font-bold mt-0.5 group-hover:bg-zinc-700 group-hover:text-white transition-colors">
@@ -354,7 +354,7 @@ export default function CaseClient({ caseData }: CaseClientProps) {
 
           {/* Right Column: Investigation Grid */}
           <div className="lg:sticky lg:top-24 lg:self-start">
-            <div className="rounded-xl border border-zinc-800 bg-gradient-to-br from-zinc-900 to-zinc-950 p-6 shadow-lg shadow-black/20">
+            <div className="rounded-xl border border-zinc-800 bg-gradient-to-br from-zinc-900 to-zinc-950 p-4 sm:p-6 shadow-lg shadow-black/20">
               <InvestigationGrid 
                 caseData={caseData} 
                 gridState={gridState}
@@ -366,12 +366,12 @@ export default function CaseClient({ caseData }: CaseClientProps) {
       </div>
 
       {/* Final Deduction Section */}
-      <div className="rounded-xl border border-zinc-800 bg-gradient-to-br from-zinc-900 to-zinc-950 p-6 shadow-lg shadow-black/20">
-        <h2 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
-          <span className="text-2xl">🎯</span>
+      <div className="rounded-xl border border-zinc-800 bg-gradient-to-br from-zinc-900 to-zinc-950 p-4 sm:p-6 shadow-lg shadow-black/20">
+        <h2 className="text-lg sm:text-xl font-bold text-white mb-4 sm:mb-6 flex items-center gap-2">
+          <span className="text-xl sm:text-2xl">🎯</span>
           {textsTR.grid.finalDeduction}
         </h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-5 mb-4 sm:mb-6">
           {/* Suspect Dropdown */}
           <div>
             <label className="block text-sm font-semibold text-zinc-300 mb-3 flex items-center gap-2">
@@ -382,7 +382,7 @@ export default function CaseClient({ caseData }: CaseClientProps) {
               value={finalSuspect}
               onChange={(e) => setFinalSuspect(e.target.value)}
               disabled={isModalOpen || isSubmitting || activeCase.status === "finished"}
-              className="w-full rounded-lg border border-zinc-800 bg-zinc-950 px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-white/30 focus:border-zinc-700 transition-all font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full rounded-lg border border-zinc-800 bg-zinc-950 px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base text-white focus:outline-none focus:ring-2 focus:ring-white/30 focus:border-zinc-700 transition-all font-medium disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <option value="">-- Seçiniz --</option>
               {caseData.suspects.map((suspect) => (
@@ -403,7 +403,7 @@ export default function CaseClient({ caseData }: CaseClientProps) {
               value={finalLocation}
               onChange={(e) => setFinalLocation(e.target.value)}
               disabled={isModalOpen || isSubmitting || activeCase.status === "finished"}
-              className="w-full rounded-lg border border-zinc-800 bg-zinc-950 px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-white/30 focus:border-zinc-700 transition-all font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full rounded-lg border border-zinc-800 bg-zinc-950 px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base text-white focus:outline-none focus:ring-2 focus:ring-white/30 focus:border-zinc-700 transition-all font-medium disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <option value="">-- Seçiniz --</option>
               {caseData.locations.map((location) => (
@@ -424,7 +424,7 @@ export default function CaseClient({ caseData }: CaseClientProps) {
               value={finalWeapon}
               onChange={(e) => setFinalWeapon(e.target.value)}
               disabled={isModalOpen || isSubmitting || activeCase.status === "finished"}
-              className="w-full rounded-lg border border-zinc-800 bg-zinc-950 px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-white/30 focus:border-zinc-700 transition-all font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full rounded-lg border border-zinc-800 bg-zinc-950 px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base text-white focus:outline-none focus:ring-2 focus:ring-white/30 focus:border-zinc-700 transition-all font-medium disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <option value="">-- Seçiniz --</option>
               {caseData.weapons.map((weapon) => (

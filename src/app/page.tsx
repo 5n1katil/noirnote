@@ -4,9 +4,9 @@ import { textsTR } from "@/lib/texts.tr";
 export default function Home() {
   return (
     <div className="min-h-screen bg-zinc-50 text-zinc-950 dark:bg-black dark:text-zinc-50">
-      <main className="mx-auto flex w-full max-w-3xl flex-col gap-8 px-6 py-20">
-        <div className="rounded-2xl border border-zinc-200 bg-white p-8 shadow-sm dark:border-zinc-800 dark:bg-zinc-950">
-          <h1 className="text-3xl font-semibold tracking-tight">
+      <main className="mx-auto flex w-full max-w-3xl flex-col gap-6 sm:gap-8 px-4 sm:px-6 py-12 sm:py-20">
+        <div className="rounded-2xl border border-zinc-200 bg-white p-6 sm:p-8 shadow-sm dark:border-zinc-800 dark:bg-zinc-950">
+          <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight">
             {textsTR.home.title}
           </h1>
           <p className="mt-3 text-zinc-600 dark:text-zinc-300">

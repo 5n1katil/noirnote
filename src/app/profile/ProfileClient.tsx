@@ -456,28 +456,28 @@ export default function ProfileClient() {
   return (
     <div className="space-y-6">
       {/* User Info */}
-      <div className="rounded-xl border border-zinc-800 bg-gradient-to-br from-zinc-900 to-zinc-950 p-6 shadow-lg shadow-black/20">
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-4">
+      <div className="rounded-xl border border-zinc-800 bg-gradient-to-br from-zinc-900 to-zinc-950 p-4 sm:p-6 shadow-lg shadow-black/20">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
+          <div className="flex items-center gap-3 sm:gap-4">
             {displayAvatar ? (
-              <div className="w-16 h-16 rounded-full border-2 border-zinc-700 bg-zinc-900 flex items-center justify-center text-3xl">
+              <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-full border-2 border-zinc-700 bg-zinc-900 flex items-center justify-center text-2xl sm:text-3xl flex-shrink-0">
                 {getAvatarEmoji(displayAvatar)}
               </div>
             ) : (
-              <div className="w-16 h-16 rounded-full border-2 border-zinc-700 bg-zinc-900 flex items-center justify-center text-3xl">
+              <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-full border-2 border-zinc-700 bg-zinc-900 flex items-center justify-center text-2xl sm:text-3xl flex-shrink-0">
                 {displayUsername[0]?.toUpperCase() || "K"}
               </div>
             )}
-            <div>
-              <h2 className="text-2xl font-bold text-white">{displayUsername}</h2>
-              <p className="text-sm text-zinc-400">{user.email}</p>
+            <div className="min-w-0">
+              <h2 className="text-xl sm:text-2xl font-bold text-white break-words">{displayUsername}</h2>
+              <p className="text-xs sm:text-sm text-zinc-400 break-words">{user.email}</p>
             </div>
           </div>
           {!isEditing && (
             <button
               type="button"
               onClick={() => setIsEditing(true)}
-              className="rounded-lg border border-zinc-800 bg-zinc-950 px-4 py-2 text-sm font-semibold text-white hover:bg-zinc-900 transition-all"
+              className="w-full sm:w-auto rounded-lg border border-zinc-800 bg-zinc-950 px-4 py-2 text-xs sm:text-sm font-semibold text-white hover:bg-zinc-900 transition-all whitespace-nowrap"
             >
               {textsTR.profile.editProfile}
             </button>
@@ -557,7 +557,7 @@ export default function ProfileClient() {
       </div>
 
       {/* Stats */}
-      <div className="rounded-xl border border-zinc-800 bg-gradient-to-br from-zinc-900 to-zinc-950 p-6 shadow-lg shadow-black/20">
+      <div className="rounded-xl border border-zinc-800 bg-gradient-to-br from-zinc-900 to-zinc-950 p-4 sm:p-6 shadow-lg shadow-black/20">
         <h2 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
           <span className="text-2xl">📊</span>
           {textsTR.profile.stats}
@@ -593,7 +593,7 @@ export default function ProfileClient() {
       </div>
 
       {/* Case Results */}
-      <div className="rounded-xl border border-zinc-800 bg-gradient-to-br from-zinc-900 to-zinc-950 p-6 shadow-lg shadow-black/20">
+      <div className="rounded-xl border border-zinc-800 bg-gradient-to-br from-zinc-900 to-zinc-950 p-4 sm:p-6 shadow-lg shadow-black/20">
         <h2 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
           <span className="text-2xl">🏆</span>
           {textsTR.profile.caseResults}
@@ -613,40 +613,40 @@ export default function ProfileClient() {
                     : "border-zinc-800/50 bg-zinc-950/30 opacity-75"
                 }`}
               >
-                <div className="grid grid-cols-1 md:grid-cols-6 gap-4 items-center">
-                  <div>
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3 sm:gap-4">
+                  <div className="col-span-2 sm:col-span-1">
                     <div className="text-xs text-zinc-500 mb-1">{textsTR.profile.case}</div>
-                    <div className="font-semibold text-white">{result.caseTitle}</div>
+                    <div className="font-semibold text-white text-sm sm:text-base break-words">{result.caseTitle}</div>
                   </div>
                   <div>
                     <div className="text-xs text-zinc-500 mb-1">Durum</div>
-                    <div className={`font-semibold ${result.isWin ? "text-green-400" : "text-red-400"}`}>
+                    <div className={`font-semibold text-sm sm:text-base ${result.isWin ? "text-green-400" : "text-red-400"}`}>
                       {result.isWin ? "✓ Başarılı" : "✗ Başarısız"}
                     </div>
                   </div>
                   {result.isWin && result.score !== undefined && (
                     <div>
                       <div className="text-xs text-zinc-500 mb-1">{textsTR.profile.score}</div>
-                      <div className="font-semibold text-yellow-400">{result.score.toLocaleString("tr-TR")}</div>
+                      <div className="font-semibold text-yellow-400 text-sm sm:text-base">{result.score.toLocaleString("tr-TR")}</div>
                     </div>
                   )}
                   {!result.isWin && (
                     <div>
                       <div className="text-xs text-zinc-500 mb-1">{textsTR.profile.score}</div>
-                      <div className="font-semibold text-zinc-500">-</div>
+                      <div className="font-semibold text-zinc-500 text-sm sm:text-base">-</div>
                     </div>
                   )}
                   <div>
                     <div className="text-xs text-zinc-500 mb-1">{textsTR.profile.time}</div>
-                    <div className="font-semibold text-white">{formatDuration(result.durationMs)}</div>
+                    <div className="font-semibold text-white text-sm sm:text-base">{formatDuration(result.durationMs)}</div>
                   </div>
                   <div>
                     <div className="text-xs text-zinc-500 mb-1">{textsTR.profile.attempts}</div>
-                    <div className="font-semibold text-white">{result.attempts}</div>
+                    <div className="font-semibold text-white text-sm sm:text-base">{result.attempts}</div>
                   </div>
-                  <div>
+                  <div className="col-span-2 sm:col-span-1">
                     <div className="text-xs text-zinc-500 mb-1">{textsTR.profile.completedAt}</div>
-                    <div className="font-semibold text-white text-sm">{formatDate(result.finishedAt)}</div>
+                    <div className="font-semibold text-white text-xs sm:text-sm">{formatDate(result.finishedAt)}</div>
                   </div>
                 </div>
               </div>

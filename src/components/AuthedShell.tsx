@@ -80,10 +80,11 @@ export function AuthedShell({ title, children }: AuthedShellProps) {
           style={{
             maxWidth: 1200,
             margin: "0 auto",
-            padding: "14px 20px",
+            padding: "12px 16px",
             display: "flex",
             alignItems: "center",
-            gap: 18,
+            gap: 12,
+            flexWrap: "wrap",
           }}
         >
           <Link
@@ -91,17 +92,17 @@ export function AuthedShell({ title, children }: AuthedShellProps) {
             style={{
               display: "flex",
               alignItems: "center",
-              gap: 14,
+              gap: 10,
               textDecoration: "none",
               color: "white",
-              minWidth: 200,
+              flexShrink: 0,
             }}
           >
             <div
               style={{
-                width: 56,
-                height: 56,
-                borderRadius: 12,
+                width: 40,
+                height: 40,
+                borderRadius: 10,
                 overflow: "hidden",
                 flexShrink: 0,
                 display: "flex",
@@ -114,8 +115,8 @@ export function AuthedShell({ title, children }: AuthedShellProps) {
               <Image
                 src="/logo.png"
                 alt={textsTR.a11y.appLogoAlt}
-                width={56}
-                height={56}
+                width={40}
+                height={40}
                 priority
                 style={{
                   width: "100%",
@@ -124,13 +125,13 @@ export function AuthedShell({ title, children }: AuthedShellProps) {
                 }}
               />
             </div>
-            <div style={{ lineHeight: 1.2 }}>
-              <div style={{ fontWeight: 900, fontSize: 18 }}>NoirNote</div>
-              <div style={{ fontSize: 11, opacity: 0.7, letterSpacing: "0.5px" }}>5N 1Dedektif</div>
+            <div className="hidden sm:block" style={{ lineHeight: 1.2 }}>
+              <div style={{ fontWeight: 900, fontSize: 16 }}>NoirNote</div>
+              <div style={{ fontSize: 10, opacity: 0.7, letterSpacing: "0.5px" }}>5N 1Dedektif</div>
             </div>
           </Link>
 
-          <nav style={{ display: "flex", gap: 16, flexWrap: "wrap" }}>
+          <nav className="flex gap-2 sm:gap-4 flex-wrap">
             {nav.map((item) => {
               const active = pathname === item.href;
               return (
@@ -141,10 +142,11 @@ export function AuthedShell({ title, children }: AuthedShellProps) {
                     textDecoration: "none",
                     color: active ? "white" : "rgba(255,255,255,0.7)",
                     fontWeight: 700,
-                    fontSize: 14,
-                    padding: "8px 10px",
-                    borderRadius: 10,
+                    fontSize: 13,
+                    padding: "6px 10px",
+                    borderRadius: 8,
                     background: active ? "rgba(255,255,255,0.08)" : "transparent",
+                    whiteSpace: "nowrap",
                   }}
                 >
                   {item.label}
@@ -153,18 +155,17 @@ export function AuthedShell({ title, children }: AuthedShellProps) {
             })}
           </nav>
 
-          <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 10 }}>
+          <div className="flex items-center gap-2 ml-auto" style={{ flexShrink: 0 }}>
             <div
               title={displayName}
+              className="flex items-center"
               style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 10,
+                gap: 8,
                 padding: "6px 10px",
-                borderRadius: 14,
+                borderRadius: 12,
                 border: "1px solid rgba(255,255,255,0.12)",
                 background: "rgba(255,255,255,0.05)",
-                maxWidth: 260,
+                maxWidth: 200,
               }}
             >
               <div
@@ -188,6 +189,7 @@ export function AuthedShell({ title, children }: AuthedShellProps) {
                 )}
               </div>
               <div
+                className="hidden sm:block"
                 style={{
                   fontSize: 13,
                   fontWeight: 800,
@@ -204,15 +206,17 @@ export function AuthedShell({ title, children }: AuthedShellProps) {
             <button
               type="button"
               onClick={onLogout}
+              className="text-xs sm:text-sm"
               style={{
-                height: 36,
-                padding: "0 14px",
-                borderRadius: 12,
+                height: 32,
+                padding: "0 10px",
+                borderRadius: 10,
                 border: "1px solid rgba(255,255,255,0.18)",
                 background: "rgba(255,255,255,0.06)",
                 color: "white",
                 cursor: "pointer",
                 fontWeight: 800,
+                whiteSpace: "nowrap",
               }}
             >
               {textsTR?.nav?.logout ?? "Çıkış yap"}
@@ -221,9 +225,9 @@ export function AuthedShell({ title, children }: AuthedShellProps) {
         </div>
       </header>
 
-      <main style={{ maxWidth: 1200, margin: "0 auto", padding: "28px 20px", color: "white" }}>
-        <h1 style={{ fontSize: 34, fontWeight: 900, margin: 0 }}>{title}</h1>
-        <div style={{ marginTop: 14 }}>{children}</div>
+      <main className="max-w-[1200px] mx-auto px-4 sm:px-6 py-4 sm:py-7" style={{ color: "white" }}>
+        <h1 className="text-2xl sm:text-3xl md:text-4xl font-black m-0">{title}</h1>
+        <div className="mt-3 sm:mt-4">{children}</div>
       </main>
     </div>
   );

@@ -104,10 +104,10 @@ export default function ProfileSetupClient() {
 
   return (
     <div className="min-h-screen bg-black text-white">
-      <div className="max-w-2xl mx-auto px-6 py-12">
-        <div className="rounded-xl border border-zinc-800 bg-gradient-to-br from-zinc-900 to-zinc-950 p-8 shadow-lg shadow-black/20">
-          <h1 className="text-3xl font-bold text-white mb-2">{textsTR.profileSetup.title}</h1>
-          <p className="text-zinc-400 mb-8">{textsTR.profileSetup.subtitle}</p>
+      <div className="max-w-2xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+        <div className="rounded-xl border border-zinc-800 bg-gradient-to-br from-zinc-900 to-zinc-950 p-6 sm:p-8 shadow-lg shadow-black/20">
+          <h1 className="text-2xl sm:text-3xl font-bold text-white mb-2">{textsTR.profileSetup.title}</h1>
+          <p className="text-sm sm:text-base text-zinc-400 mb-6 sm:mb-8">{textsTR.profileSetup.subtitle}</p>
 
           <form onSubmit={handleSubmit} className="space-y-8">
             {/* Username Field */}

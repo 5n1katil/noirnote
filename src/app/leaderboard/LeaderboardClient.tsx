@@ -204,9 +204,9 @@ export default function LeaderboardClient() {
   const selectedCase = selectedCaseId !== "global" ? cases.find((c) => c.id === selectedCaseId) : null;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Case Selector */}
-      <div className="rounded-xl border border-zinc-800 bg-gradient-to-br from-zinc-900 to-zinc-950 p-6 shadow-lg shadow-black/20">
+      <div className="rounded-xl border border-zinc-800 bg-gradient-to-br from-zinc-900 to-zinc-950 p-4 sm:p-6 shadow-lg shadow-black/20">
         <label className="block text-sm font-semibold text-zinc-300 mb-3">
           {textsTR.leaderboard.selectCase}
         </label>
@@ -225,12 +225,14 @@ export default function LeaderboardClient() {
       </div>
 
       {/* Leaderboard */}
-      <div className="rounded-xl border border-zinc-800 bg-gradient-to-br from-zinc-900 to-zinc-950 p-6 shadow-lg shadow-black/20">
-        <h2 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
-          <span className="text-2xl">🏆</span>
-          {selectedCaseId === "global" 
-            ? textsTR.leaderboard.global 
-            : `${textsTR.leaderboard.caseSpecific}: ${selectedCase ? getText(selectedCase.titleKey) : ""}`}
+      <div className="rounded-xl border border-zinc-800 bg-gradient-to-br from-zinc-900 to-zinc-950 p-4 sm:p-6 shadow-lg shadow-black/20">
+        <h2 className="text-lg sm:text-xl font-bold text-white mb-4 sm:mb-6 flex items-center gap-2 flex-wrap">
+          <span className="text-xl sm:text-2xl">🏆</span>
+          <span className="break-words">
+            {selectedCaseId === "global" 
+              ? textsTR.leaderboard.global 
+              : `${textsTR.leaderboard.caseSpecific}: ${selectedCase ? getText(selectedCase.titleKey) : ""}`}
+          </span>
         </h2>
 
         {loading ? (
@@ -242,34 +244,34 @@ export default function LeaderboardClient() {
             {textsTR.leaderboard.noEntries}
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full">
+          <div className="overflow-x-auto -mx-4 sm:mx-0">
+            <table className="w-full min-w-[600px] sm:min-w-0">
               <thead>
                 <tr className="border-b border-zinc-800">
-                  <th className="text-left py-3 px-4 text-xs font-semibold text-zinc-500 uppercase">
+                  <th className="text-left py-2 sm:py-3 px-2 sm:px-4 text-xs font-semibold text-zinc-500 uppercase">
                     {textsTR.leaderboard.rank}
                   </th>
-                  <th className="text-left py-3 px-4 text-xs font-semibold text-zinc-500 uppercase">
+                  <th className="text-left py-2 sm:py-3 px-2 sm:px-4 text-xs font-semibold text-zinc-500 uppercase">
                     {textsTR.leaderboard.player}
                   </th>
-                  <th className="text-right py-3 px-4 text-xs font-semibold text-zinc-500 uppercase">
+                  <th className="text-right py-2 sm:py-3 px-2 sm:px-4 text-xs font-semibold text-zinc-500 uppercase">
                     {textsTR.leaderboard.score}
                   </th>
                   {selectedCaseId === "global" ? (
                     <>
-                      <th className="text-right py-3 px-4 text-xs font-semibold text-zinc-500 uppercase">
+                      <th className="text-right py-2 sm:py-3 px-2 sm:px-4 text-xs font-semibold text-zinc-500 uppercase">
                         {textsTR.leaderboard.cases}
                       </th>
-                      <th className="text-right py-3 px-4 text-xs font-semibold text-zinc-500 uppercase">
+                      <th className="text-right py-2 sm:py-3 px-2 sm:px-4 text-xs font-semibold text-zinc-500 uppercase">
                         {textsTR.profile.averageTime}
                       </th>
                     </>
                   ) : (
                     <>
-                      <th className="text-right py-3 px-4 text-xs font-semibold text-zinc-500 uppercase">
+                      <th className="text-right py-2 sm:py-3 px-2 sm:px-4 text-xs font-semibold text-zinc-500 uppercase">
                         {textsTR.leaderboard.time}
                       </th>
-                      <th className="text-right py-3 px-4 text-xs font-semibold text-zinc-500 uppercase">
+                      <th className="text-right py-2 sm:py-3 px-2 sm:px-4 text-xs font-semibold text-zinc-500 uppercase">
                         {textsTR.leaderboard.attempts}
                       </th>
                     </>
@@ -282,61 +284,61 @@ export default function LeaderboardClient() {
                     key={entry.uid}
                     className="border-b border-zinc-800/50 hover:bg-zinc-900/50 transition-colors"
                   >
-                    <td className="py-4 px-4">
-                      <div className="flex items-center gap-3">
-                        <span className="text-lg font-bold text-zinc-400">#{entry.rank || index + 1}</span>
+                    <td className="py-2 sm:py-3 px-2 sm:px-4">
+                      <div className="flex items-center gap-2 sm:gap-3">
+                        <span className="text-base sm:text-lg font-bold text-zinc-400">#{entry.rank || index + 1}</span>
                         {index < 3 && (
-                          <span className="text-2xl">
+                          <span className="text-xl sm:text-2xl">
                             {index === 0 ? "🥇" : index === 1 ? "🥈" : "🥉"}
                           </span>
                         )}
                       </div>
                     </td>
-                    <td className="py-4 px-4">
-                      <div className="flex items-center gap-3">
+                    <td className="py-2 sm:py-3 px-2 sm:px-4">
+                      <div className="flex items-center gap-2 sm:gap-3 min-w-0">
                         {entry.avatar ? (
-                          <div className="w-8 h-8 rounded-full border border-zinc-700 bg-zinc-900 flex items-center justify-center text-lg">
+                          <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-full border border-zinc-700 bg-zinc-900 flex items-center justify-center text-sm sm:text-lg flex-shrink-0">
                             {getAvatarEmoji(entry.avatar)}
                           </div>
                         ) : entry.photoURL ? (
                           <img
                             src={entry.photoURL}
                             alt={entry.displayName}
-                            className="w-8 h-8 rounded-full border border-zinc-700"
+                            className="w-6 h-6 sm:w-8 sm:h-8 rounded-full border border-zinc-700 flex-shrink-0"
                           />
                         ) : (
-                          <div className="w-8 h-8 rounded-full border border-zinc-700 bg-zinc-900 flex items-center justify-center text-xs font-bold">
+                          <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-full border border-zinc-700 bg-zinc-900 flex items-center justify-center text-xs font-bold flex-shrink-0">
                             {(entry.displayName?.[0] || "K").toUpperCase()}
                           </div>
                         )}
-                        <span className="font-semibold text-white">{entry.displayName}</span>
+                        <span className="font-semibold text-white text-xs sm:text-sm truncate">{entry.displayName}</span>
                       </div>
                     </td>
-                    <td className="py-4 px-4 text-right">
-                      <span className="font-bold text-yellow-400">
+                    <td className="py-2 sm:py-3 px-2 sm:px-4 text-right">
+                      <span className="font-bold text-yellow-400 text-sm sm:text-base">
                         {entry.score.toLocaleString("tr-TR")}
                       </span>
                     </td>
                     {selectedCaseId === "global" ? (
                       <>
-                        <td className="py-4 px-4 text-right">
-                          <span className="text-white">{entry.solvedCases || 0}</span>
+                        <td className="py-2 sm:py-3 px-2 sm:px-4 text-right">
+                          <span className="text-white text-sm sm:text-base">{entry.solvedCases || 0}</span>
                         </td>
-                        <td className="py-4 px-4 text-right">
-                          <span className="text-white">
+                        <td className="py-2 sm:py-3 px-2 sm:px-4 text-right">
+                          <span className="text-white text-xs sm:text-sm">
                             {entry.averageTimeMs ? formatDuration(entry.averageTimeMs) : "-"}
                           </span>
                         </td>
                       </>
                     ) : (
                       <>
-                        <td className="py-4 px-4 text-right">
-                          <span className="text-white">
+                        <td className="py-2 sm:py-3 px-2 sm:px-4 text-right">
+                          <span className="text-white text-xs sm:text-sm">
                             {entry.durationMs ? formatDuration(entry.durationMs) : "-"}
                           </span>
                         </td>
-                        <td className="py-4 px-4 text-right">
-                          <span className="text-white">{entry.attempts || "-"}</span>
+                        <td className="py-2 sm:py-3 px-2 sm:px-4 text-right">
+                          <span className="text-white text-sm sm:text-base">{entry.attempts || "-"}</span>
                         </td>
                       </>
                     )}

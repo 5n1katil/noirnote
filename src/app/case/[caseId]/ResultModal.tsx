@@ -48,48 +48,48 @@ export default function ResultModal({
       onClick={onClose}
     >
       <div
-        className="relative mx-4 w-full max-w-md rounded-xl border border-zinc-800 bg-gradient-to-br from-zinc-900 to-zinc-950 p-6 shadow-xl"
+        className="relative mx-4 w-full max-w-md rounded-xl border border-zinc-800 bg-gradient-to-br from-zinc-900 to-zinc-950 p-4 sm:p-6 shadow-xl"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Close button */}
         <button
           onClick={onClose}
-          className="absolute right-4 top-4 text-zinc-400 hover:text-white transition-colors"
+          className="absolute right-3 sm:right-4 top-3 sm:top-4 text-zinc-400 hover:text-white transition-colors text-sm sm:text-base"
         >
           {textsTR.common.close}
         </button>
 
         {/* Header */}
-        <div className="text-center mb-6">
-          <div className={`text-6xl mb-4 ${isSuccess ? "animate-bounce" : ""}`}>
+        <div className="text-center mb-4 sm:mb-6">
+          <div className={`text-4xl sm:text-6xl mb-3 sm:mb-4 ${isSuccess ? "animate-bounce" : ""}`}>
             {isSuccess ? "🎉" : "❌"}
           </div>
-          <h2 className="text-2xl font-bold text-white mb-2">
+          <h2 className="text-xl sm:text-2xl font-bold text-white mb-2">
             {isSuccess ? textsTR.result.success.title : textsTR.result.failure.title}
           </h2>
-          <p className="text-sm text-zinc-400">
+          <p className="text-xs sm:text-sm text-zinc-400">
             {isSuccess ? textsTR.result.success.message : textsTR.result.failure.message}
           </p>
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-2 gap-4 mb-6 p-4 rounded-lg bg-zinc-950/50 border border-zinc-800">
+        <div className="grid grid-cols-2 gap-3 sm:gap-4 mb-4 sm:mb-6 p-3 sm:p-4 rounded-lg bg-zinc-950/50 border border-zinc-800">
           <div className="text-center">
             <div className="text-xs text-zinc-500 mb-1">{textsTR.result.stats.duration}</div>
-            <div className="text-lg font-semibold text-white">{formatDuration(duration)}</div>
+            <div className="text-base sm:text-lg font-semibold text-white">{formatDuration(duration)}</div>
           </div>
           <div className="text-center">
             <div className="text-xs text-zinc-500 mb-1">{textsTR.result.stats.attempts}</div>
-            <div className="text-lg font-semibold text-white">{attempts}</div>
+            <div className="text-base sm:text-lg font-semibold text-white">{attempts}</div>
           </div>
         </div>
 
         {/* Actions */}
-        <div className="space-y-3">
+        <div className="space-y-2 sm:space-y-3">
           {isSuccess && nextCase ? (
             <Link
               href={`/case/${nextCase.id}`}
-              className="block w-full rounded-lg bg-white text-black px-6 py-3 text-center font-semibold hover:bg-zinc-200 active:scale-[0.98] transition-all duration-200 shadow-lg shadow-black/20"
+              className="block w-full rounded-lg bg-white text-black px-4 sm:px-6 py-2.5 sm:py-3 text-center text-sm sm:text-base font-semibold hover:bg-zinc-200 active:scale-[0.98] transition-all duration-200 shadow-lg shadow-black/20"
             >
               {textsTR.result.actions.nextCase}
             </Link>
@@ -98,7 +98,7 @@ export default function ResultModal({
           {!isSuccess ? (
             <button
               onClick={onClose}
-              className="w-full rounded-lg bg-white text-black px-6 py-3 font-semibold hover:bg-zinc-200 active:scale-[0.98] transition-all duration-200 shadow-lg shadow-black/20"
+              className="w-full rounded-lg bg-white text-black px-4 sm:px-6 py-2.5 sm:py-3 text-sm sm:text-base font-semibold hover:bg-zinc-200 active:scale-[0.98] transition-all duration-200 shadow-lg shadow-black/20"
             >
               {textsTR.result.actions.retry}
             </button>
@@ -106,7 +106,7 @@ export default function ResultModal({
 
           <Link
             href="/dashboard"
-            className="block w-full rounded-lg border border-zinc-700 bg-zinc-800 text-white px-6 py-3 text-center font-semibold hover:bg-zinc-700 active:scale-[0.98] transition-all duration-200"
+            className="block w-full rounded-lg border border-zinc-700 bg-zinc-800 text-white px-4 sm:px-6 py-2.5 sm:py-3 text-center text-sm sm:text-base font-semibold hover:bg-zinc-700 active:scale-[0.98] transition-all duration-200"
           >
             {textsTR.result.actions.dashboard}
           </Link>

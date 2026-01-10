@@ -34,20 +34,20 @@ function EntityInfoCard({ name, icon, bio, onClose }: EntityInfoCardProps) {
       onClick={onClose}
     >
       <div
-        className="relative mx-4 w-full max-w-md rounded-xl border border-zinc-800 bg-zinc-900 p-6 shadow-xl"
+        className="relative mx-4 w-full max-w-md rounded-xl border border-zinc-800 bg-zinc-900 p-4 sm:p-6 shadow-xl"
         onClick={(e) => e.stopPropagation()}
       >
         <button
           onClick={onClose}
-          className="absolute right-4 top-4 text-zinc-400 hover:text-white transition-colors"
+          className="absolute right-3 sm:right-4 top-3 sm:top-4 text-zinc-400 hover:text-white transition-colors text-sm sm:text-base"
         >
           {textsTR.common.close}
         </button>
         <div className="text-center">
-          <div className="text-4xl mb-3">{icon}</div>
-          <h3 className="text-xl font-semibold text-white mb-3">{name}</h3>
+          <div className="text-3xl sm:text-4xl mb-2 sm:mb-3">{icon}</div>
+          <h3 className="text-lg sm:text-xl font-semibold text-white mb-2 sm:mb-3">{name}</h3>
           {bio && (
-            <p className="text-sm text-zinc-300 leading-relaxed px-2">{bio}</p>
+            <p className="text-xs sm:text-sm text-zinc-300 leading-relaxed px-2">{bio}</p>
           )}
         </div>
       </div>
@@ -132,13 +132,13 @@ export default function InvestigationGrid({
 
   return (
     <>
-      <div className="space-y-6">
-        <h2 className="text-xl font-semibold text-white">
+      <div className="space-y-4 sm:space-y-6">
+        <h2 className="text-lg sm:text-xl font-semibold text-white">
           {textsTR.grid.title}
         </h2>
 
         {/* L-shaped notebook grid */}
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto -mx-4 sm:mx-0 px-4 sm:px-0">
           <LNotebookGrid
             suspects={caseData.suspects}
             weapons={caseData.weapons}
