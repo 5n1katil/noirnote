@@ -30,7 +30,7 @@ import { getCaseById } from "@/lib/cases";
 import { getText } from "@/lib/text-resolver";
 import { textsTR } from "@/lib/texts.tr";
 import type { CaseResult } from "@/lib/caseResult.client";
-import { getUserDoc, updateUserDoc } from "@/lib/userDoc.client";
+import { getUserDoc, updateUserDoc, type FirestoreUserDoc } from "@/lib/userDoc.client";
 import { AVATAR_OPTIONS, getAvatarEmoji } from "@/lib/avatars";
 
 type CaseResultWithDetails = CaseResult & {
@@ -79,11 +79,44 @@ export default function ProfileClient() {
     let unsubscribeStats: (() => void) | null = null;
     let unsubscribeResults: (() => void) | null = null;
     let unsubscribeAuth: (() => void) | null = null;
+    let unsubscribeUserDoc: (() => void) | null = null;
+
+    // Helper function to load user document and setup listener
+    function loadUserDocAndSetupListener(currentUser: User) {
+      // Load user document immediately
+      getUserDoc(currentUser.uid)
+        .then((doc) => {
+          if (doc) {
+            setUserDoc({ detectiveUsername: doc.detectiveUsername, avatar: doc.avatar });
+            setEditUsername(doc.detectiveUsername || "");
+            setEditAvatar(doc.avatar || AVATAR_OPTIONS[0].id);
+          }
+        })
+        .catch((err) => console.error("[ProfileClient] Error loading user doc:", err));
+
+      // Setup real-time listener for user document updates
+      const userDocRef = doc(db, "users", currentUser.uid);
+      unsubscribeUserDoc = onSnapshot(
+        userDocRef,
+        (snap) => {
+          if (snap.exists()) {
+            const userData = snap.data() as FirestoreUserDoc;
+            setUserDoc({ detectiveUsername: userData.detectiveUsername, avatar: userData.avatar });
+            setEditUsername(userData.detectiveUsername || "");
+            setEditAvatar(userData.avatar || AVATAR_OPTIONS[0].id);
+          }
+        },
+        (error) => {
+          console.error("[ProfileClient] User doc listener error:", error);
+        }
+      );
+    }
 
     // Get user immediately (from auth.currentUser if available)
     const currentUser = auth.currentUser;
     if (currentUser) {
       setUser(currentUser);
+      loadUserDocAndSetupListener(currentUser);
       setupListeners(currentUser);
     } else {
       // Only wait for auth if not immediately available (should be rare)
@@ -99,24 +132,19 @@ export default function ProfileClient() {
           unsubscribeResults();
           unsubscribeResults = null;
         }
+        if (unsubscribeUserDoc) {
+          unsubscribeUserDoc();
+          unsubscribeUserDoc = null;
+        }
 
         if (!user) {
           setStatsLoading(false);
           setResultsLoading(false);
+          setUserDoc(null);
           return;
         }
 
-        // Load user document
-        getUserDoc(user.uid)
-          .then((doc) => {
-            if (doc) {
-              setUserDoc({ detectiveUsername: doc.detectiveUsername, avatar: doc.avatar });
-              setEditUsername(doc.detectiveUsername || "");
-              setEditAvatar(doc.avatar || AVATAR_OPTIONS[0].id);
-            }
-          })
-          .catch((err) => console.error("[ProfileClient] Error loading user doc:", err));
-
+        loadUserDocAndSetupListener(user);
         setupListeners(user);
       });
     }
@@ -354,6 +382,7 @@ export default function ProfileClient() {
       if (unsubscribeAuth) unsubscribeAuth();
       if (unsubscribeStats) unsubscribeStats();
       if (unsubscribeResults) unsubscribeResults();
+      if (unsubscribeUserDoc) unsubscribeUserDoc();
     };
   }, []);
 
