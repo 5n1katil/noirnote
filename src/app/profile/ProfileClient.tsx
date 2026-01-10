@@ -419,7 +419,9 @@ export default function ProfileClient() {
     setEditAvatar(userDoc?.avatar || AVATAR_OPTIONS[0].id);
   }
 
-  const displayUsername = userDoc?.detectiveUsername || user?.displayName || user?.email || "Kullanıcı";
+  // Only use detectiveUsername from profile setup, fallback to email if not set
+  // Don't use Google's displayName or photoURL for privacy
+  const displayUsername = userDoc?.detectiveUsername || user?.email || "Kullanıcı";
   const displayAvatar = userDoc?.avatar;
 
   return (
@@ -432,12 +434,6 @@ export default function ProfileClient() {
               <div className="w-16 h-16 rounded-full border-2 border-zinc-700 bg-zinc-900 flex items-center justify-center text-3xl">
                 {getAvatarEmoji(displayAvatar)}
               </div>
-            ) : user?.photoURL ? (
-              <img
-                src={user.photoURL}
-                alt={displayUsername}
-                className="w-16 h-16 rounded-full border-2 border-zinc-700"
-              />
             ) : (
               <div className="w-16 h-16 rounded-full border-2 border-zinc-700 bg-zinc-900 flex items-center justify-center text-3xl">
                 {displayUsername[0]?.toUpperCase() || "K"}

@@ -59,9 +59,10 @@ export function AuthedShell({ title, children }: AuthedShellProps) {
     router.replace("/login");
   }
 
-  const displayName = userDoc?.detectiveUsername || user?.displayName || user?.email || "Kullanıcı";
+  // Only use detectiveUsername from profile setup, fallback to email if not set
+  // Don't use Google's displayName or photoURL for privacy
+  const displayName = userDoc?.detectiveUsername || user?.email || "Kullanıcı";
   const avatar = userDoc?.avatar;
-  const photoURL = user?.photoURL || "";
 
   return (
     <div style={{ minHeight: "100vh", background: "#000" }}>
@@ -180,9 +181,6 @@ export function AuthedShell({ title, children }: AuthedShellProps) {
               >
                 {avatar ? (
                   <span style={{ fontSize: 14 }}>{getAvatarEmoji(avatar)}</span>
-                ) : photoURL ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={photoURL} alt="" style={{ width: "100%", height: "100%" }} />
                 ) : (
                   <span style={{ fontSize: 12, fontWeight: 900 }}>
                     {(displayName?.[0] || "K").toUpperCase()}
