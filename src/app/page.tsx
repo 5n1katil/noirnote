@@ -126,13 +126,6 @@ export default function Home() {
             </Link>
           </div>
         </div>
-
-        {/* Footer decoration */}
-        <div className="mt-8 sm:mt-10 text-center">
-          <p className="text-sm sm:text-base text-zinc-600 font-medium">
-            5N 1Dedektif
-          </p>
-        </div>
       </main>
     </div>
   );
