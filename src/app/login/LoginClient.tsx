@@ -144,10 +144,17 @@ export default function LoginClient() {
 
       router.replace(nextPath);
     } catch (e: any) {
+      // If user closed the popup, don't show an error - just silently cancel
+      if (e?.code === "auth/popup-closed-by-user") {
+        // User intentionally closed the popup - no error needed
+        console.log("[login] User closed popup");
+        setBusy(false);
+        return;
+      }
+      
       console.error("[login] signIn error", e);
       const msg = getErrorMessage(e?.code) || e?.message || textsTR.errors.authFailed;
       setError(msg);
-    } finally {
       setBusy(false);
     }
   }
