@@ -164,6 +164,17 @@ export default function LoginClient() {
     <div className="min-h-screen bg-black text-white flex items-center justify-center px-4 sm:px-6 py-8 sm:py-12">
       <div className="w-full max-w-md">
         <div className="rounded-xl border border-zinc-800 bg-gradient-to-br from-zinc-900 to-zinc-950 p-6 sm:p-8 shadow-lg shadow-black/20">
+          <div className="mb-4">
+            <Link
+              href="/"
+              className="inline-flex items-center gap-2 text-sm text-zinc-400 hover:text-white transition-colors"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+              {textsTR.login.backToHome}
+            </Link>
+          </div>
           <h1 className="text-2xl sm:text-3xl font-bold text-white mb-2">{textsTR.login.title}</h1>
           <p className="text-sm sm:text-base text-zinc-400 mb-6 sm:mb-8">{textsTR.login.subtitle}</p>
 
