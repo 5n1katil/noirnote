@@ -64,31 +64,31 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Hero Section - Image Left, Title & Slogan Right */}
-        <div className="flex flex-col lg:flex-row items-center lg:items-start gap-8 sm:gap-12 lg:gap-16 mb-12 sm:mb-16">
-          {/* Logo and Mascot Image - Left Side */}
-          <div className="flex-shrink-0">
-            <div className="w-48 h-48 sm:w-64 sm:h-64 lg:w-80 lg:h-80 relative">
+        {/* Hero Section - Split 50/50, Image Left, Title & Slogan Right */}
+        <div className="flex flex-col lg:flex-row items-center lg:items-center gap-8 sm:gap-12 lg:gap-16 mb-12 sm:mb-16 min-h-[400px] sm:min-h-[500px] lg:min-h-[600px]">
+          {/* Logo and Mascot Image - Left Side (50%) */}
+          <div className="w-full lg:w-1/2 flex items-center justify-center">
+            <div className="w-64 h-64 sm:w-80 sm:h-80 lg:w-96 lg:h-96 xl:w-[28rem] xl:h-[28rem] relative">
               <Image
                 src="/logo-mascot.png"
                 alt={textsTR.a11y.appLogoAlt}
-                width={320}
-                height={320}
+                width={448}
+                height={448}
                 priority
                 className="w-full h-full object-contain"
               />
             </div>
           </div>
 
-          {/* Title and Slogan - Right Side */}
-          <div className="flex-1 text-center lg:text-left">
-            <h1 className="text-5xl sm:text-6xl lg:text-7xl font-black tracking-tight mb-4 sm:mb-6 bg-gradient-to-r from-white via-white to-zinc-400 bg-clip-text text-transparent">
+          {/* Title and Slogan - Right Side (50%) */}
+          <div className="w-full lg:w-1/2 flex flex-col items-center lg:items-start justify-center text-center lg:text-left">
+            <h1 className="text-5xl sm:text-6xl lg:text-7xl xl:text-8xl font-black tracking-tight mb-4 sm:mb-6 bg-gradient-to-r from-white via-white to-zinc-400 bg-clip-text text-transparent">
               {texts.title}
             </h1>
-            <p className="text-lg sm:text-xl lg:text-2xl font-bold text-zinc-300 tracking-wide mb-2">
+            <p className="text-lg sm:text-xl lg:text-2xl xl:text-3xl font-bold text-zinc-300 tracking-wide mb-2">
               {texts.mainSlogan}
             </p>
-            <p className="text-sm sm:text-base text-zinc-500 font-medium">
+            <p className="text-sm sm:text-base lg:text-lg text-zinc-500 font-medium">
               {texts.mainSloganEn}
             </p>
           </div>
