@@ -39,7 +39,7 @@ export default function Home() {
       
       <main className="relative z-10 mx-auto flex w-full max-w-6xl flex-col px-4 sm:px-6 pt-4 sm:pt-0 pb-6 sm:pb-4">
         {/* Language Selector - Top Right */}
-        <div className="flex justify-end mb-4 sm:mb-0 sm:mt-8 lg:mt-10">
+        <div className="flex justify-end mb-2 sm:mb-0 sm:mt-8 lg:mt-10">
           <div className="relative z-20 flex items-center gap-1.5 sm:gap-2 rounded-xl border border-white/20 bg-white/5 p-0.5 sm:p-1">
             <button
               type="button"
@@ -67,7 +67,7 @@ export default function Home() {
         </div>
 
         {/* Hero Section - Split 50/50, Image Left, Title & Slogan Right */}
-        <div className="flex flex-col lg:flex-row items-center lg:items-center gap-4 sm:gap-6 lg:gap-8 mb-6 sm:mb-4 lg:-mb-6 mt-0 sm:-mt-24 lg:-mt-24">
+        <div className="flex flex-col lg:flex-row items-center lg:items-center gap-2 sm:gap-6 lg:gap-8 mb-6 sm:mb-4 lg:-mb-6 -mt-16 sm:-mt-24 lg:-mt-24">
           {/* Logo and Mascot Image - Left Side (50%) */}
           <div className="w-full lg:w-1/2 flex items-center justify-center">
             <div className="w-72 h-72 sm:w-64 sm:h-64 lg:w-96 lg:h-96 xl:w-[28rem] xl:h-[28rem] relative">
