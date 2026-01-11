@@ -78,11 +78,10 @@ export const case002: Case = {
     "cases.case002.clues.clue4",
     "cases.case002.clues.clue5",
     "cases.case002.clues.clue6",
-    "cases.case002.clues.clue7",
   ],
   solution: {
     suspectId: "suspect-009", // Selin Vural
-    locationId: "location-008", // Servis Koridoru (Personel Geçişi)
-    weaponId: "weapon-008", // Küçük Metal Levye (ORTA)
+    locationId: "location-007", // Kurbanın Odası (504)
+    weaponId: "weapon-009", // Zehirli İçecek
   },
 };
