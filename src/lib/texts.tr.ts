@@ -99,7 +99,7 @@ export const textsTR = {
       briefing:
         "Lüks otelin 5. katında bir oda hizmetçisi ceset buldu. Kurban, odasında ölü bulundu ve birkaç değerli eşya eksikti. Kapı zorla açılmıştı. Kurbanın cep telefonu kayıp ve henüz bulunamadı.",
       clues: {
-        clue1: "Olay yerinde kilit panelinin yanında küçük metal tozu bulundu.",
+        clue1: "Kilit panelinin yanında, kapının metal kısmının bir aletle zorlandığını gösteren ince metal tozu bulundu.",
         clue2: "Güvenlik kaydı, olaydan kısa süre önce 5. kat servis koridorunda birinin uzun süre oyalanıp sonra ortadan kaybolduğunu gösteriyor.",
         clue3: "Merdiven boşluğunda belirgin ayakkabı izi yok.",
         clue4: "Kurbanın odasında halı üzerinde cam kırığına rastlanmadı.",
