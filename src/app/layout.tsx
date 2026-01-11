@@ -1,15 +1,11 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Anton } from "next/font/google";
 import "./globals.css";
 import { textsTR } from "@/lib/texts.tr";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const anton = Anton({
+  weight: "400",
+  variable: "--font-anton",
   subsets: ["latin"],
 });
 
@@ -26,7 +22,7 @@ export default function RootLayout({
   return (
     <html lang="tr">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${anton.variable} antialiased`}
       >
         {children}
       </body>
