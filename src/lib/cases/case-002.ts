@@ -9,7 +9,7 @@ import type { Case } from "@/types/game";
 export const case002: Case = {
   id: "case-002",
   titleKey: "cases.case002.title",
-  difficulty: "medium",
+  difficulty: "easy",
   briefingKey: "cases.case002.briefing",
   suspects: [
     {
