@@ -37,9 +37,9 @@ export default function Home() {
       <div className="absolute inset-0 bg-gradient-to-br from-zinc-950 via-black to-zinc-900" />
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(255,255,255,0.03),transparent_70%)]" />
       
-      <main className="relative z-10 mx-auto flex w-full max-w-6xl flex-col px-4 sm:px-6 py-12 sm:py-20 lg:py-32">
+      <main className="relative z-10 mx-auto flex w-full max-w-6xl flex-col px-4 sm:px-6 py-6 sm:py-8 lg:py-10">
         {/* Language Selector - Top Right */}
-        <div className="flex justify-end mb-8">
+        <div className="flex justify-end mb-4 sm:mb-6">
           <div className="flex items-center gap-2 rounded-xl border border-white/20 bg-white/5 p-1">
             <button
               onClick={() => setLanguage("tr")}
@@ -65,7 +65,7 @@ export default function Home() {
         </div>
 
         {/* Hero Section - Split 50/50, Image Left, Title & Slogan Right */}
-        <div className="flex flex-col lg:flex-row items-center lg:items-center gap-8 sm:gap-12 lg:gap-16 mb-12 sm:mb-16 min-h-[400px] sm:min-h-[500px] lg:min-h-[600px]">
+        <div className="flex flex-col lg:flex-row items-center lg:items-center gap-6 sm:gap-8 lg:gap-12 mb-8 sm:mb-10">
           {/* Logo and Mascot Image - Left Side (50%) */}
           <div className="w-full lg:w-1/2 flex items-center justify-center">
             <div className="w-64 h-64 sm:w-80 sm:h-80 lg:w-96 lg:h-96 xl:w-[28rem] xl:h-[28rem] relative">
@@ -95,8 +95,8 @@ export default function Home() {
         </div>
 
         {/* Description - Below */}
-        <div className="w-full max-w-4xl mx-auto mb-10 sm:mb-12 lg:mb-16">
-          <div className="space-y-4 sm:space-y-5 text-base sm:text-lg lg:text-xl text-zinc-300 leading-relaxed text-center lg:text-left">
+        <div className="w-full max-w-4xl mx-auto mb-6 sm:mb-8">
+          <div className="space-y-3 sm:space-y-4 text-base sm:text-lg lg:text-xl text-zinc-300 leading-relaxed text-center lg:text-left">
             {texts.description.split('\n').map((paragraph, index) => (
               <p key={index} className={index === 0 ? "font-semibold text-white" : ""}>
                 {paragraph}
@@ -125,7 +125,7 @@ export default function Home() {
         </div>
 
         {/* Footer decoration */}
-        <div className="mt-12 sm:mt-16 lg:mt-20 text-center">
+        <div className="mt-8 sm:mt-10 text-center">
           <p className="text-sm sm:text-base text-zinc-600 font-medium">
             5N 1Dedektif
           </p>
