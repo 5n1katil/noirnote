@@ -28,6 +28,10 @@ export const textsTR = {
     title: "NoirNote",
     subtitle:
       "Cinayet çıkarımı ve mantık bulmacaları için minimal temel kurulum.",
+    description: "NoirNote, mantık yürütme ile cinayet gizemini birleştiren dedüksiyon temelli bir bulmaca oyunudur.\nHer vakada Kim? Nerede? Neyle? sorularının tek doğru cevabını, ipuçlarını eleyerek ve dedektif not defterini doğru kullanarak bulman gerekir.\nUnutma dedektif, suçu kanıtlanana kadar herkes masumdur...",
+    descriptionEn: "NoirNote is a deduction-based puzzle game that blends logic with murder mystery.\nIn every case, you must uncover the single correct answer to Who? Where? With what? by eliminating clues and using your detective notebook wisely.\nRemember, detective—everyone is innocent until proven guilty.",
+    mainSlogan: "Kanıt yoksa suç da yoktur.",
+    mainSloganEn: "Mark it. Prove it.",
     primaryCta: "Giriş yap",
     secondaryCta: "Gösterge paneline git",
   },
