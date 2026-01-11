@@ -39,7 +39,7 @@ export default function Home() {
       
       <main className="relative z-10 mx-auto flex w-full max-w-6xl flex-col px-4 sm:px-6 pt-0 pb-4 sm:pb-6">
         {/* Language Selector - Top Right */}
-        <div className="flex justify-end mb-2">
+        <div className="flex justify-end mb-5">
           <div className="flex items-center gap-2 rounded-xl border border-white/20 bg-white/5 p-1">
             <button
               onClick={() => setLanguage("tr")}
@@ -65,7 +65,7 @@ export default function Home() {
         </div>
 
         {/* Hero Section - Split 50/50, Image Left, Title & Slogan Right */}
-        <div className="flex flex-col lg:flex-row items-center lg:items-center gap-4 sm:gap-6 lg:gap-8 mb-0 sm:mb-0 -mt-24 sm:-mt-16">
+        <div className="flex flex-col lg:flex-row items-center lg:items-center gap-4 sm:gap-6 lg:gap-8 -mb-6 sm:-mb-6 -mt-24 sm:-mt-16">
           {/* Logo and Mascot Image - Left Side (50%) */}
           <div className="w-full lg:w-1/2 flex items-center justify-center">
             <div className="w-64 h-64 sm:w-80 sm:h-80 lg:w-96 lg:h-96 xl:w-[28rem] xl:h-[28rem] relative">
